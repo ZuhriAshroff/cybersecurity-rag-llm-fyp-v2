@@ -1,0 +1,31 @@
+# FYP Dependencies — install with: pip3 install -r requirements.txt
+
+# LangChain stack
+langchain
+langchain-classic
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-experimental
+langchain-huggingface
+langchain-groq
+
+# Vector store
+chromadb
+
+# Embeddings + reranking
+sentence-transformers
+
+# UI
+streamlit
+
+# Fine-tuned model (Phi-2 + QLoRA)
+torch
+transformers
+peft
+bitsandbytes
+accelerate
+
+# Utilities
+numpy
+python-dotenv
