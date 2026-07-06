@@ -1,0 +1,14 @@
+Title: Cryptography and Encryption Fundamentals
+Source: NIST Special Publication 800-175B - Guide to Cryptographic Standards
+
+Cryptography is the practice of securing information by transforming it into an unreadable format, ensuring that only authorised parties can access the original data. Encryption is the process of converting plaintext into ciphertext using an algorithm and a key.
+
+There are two primary types of encryption:
+- Symmetric Encryption: The same key is used for both encryption and decryption. It is fast and efficient for large volumes of data. Common algorithms include AES (Advanced Encryption Standard), 3DES, and ChaCha20. The main challenge is secure key distribution.
+- Asymmetric Encryption (Public-Key Cryptography): Uses a mathematically linked key pair — a public key for encryption and a private key for decryption. Examples include RSA, ECC (Elliptic Curve Cryptography), and Diffie-Hellman. Used for secure key exchange and digital signatures.
+
+Hashing is a one-way cryptographic function that maps data to a fixed-length output (digest). It is used for data integrity verification, password storage, and digital signatures. Common hash functions include SHA-256, SHA-3, and BLAKE2. MD5 and SHA-1 are considered cryptographically broken and deprecated.
+
+Transport Layer Security (TLS) is the standard protocol for encrypting data in transit. TLS 1.3 is the current recommended version. It uses asymmetric encryption to establish a session key, then symmetric encryption for the bulk of the communication.
+
+NIST recommends AES-256 for symmetric encryption and RSA-2048 or ECC-256 as minimum key sizes for asymmetric encryption in current deployments. Post-quantum cryptographic algorithms are currently being standardised to address future threats from quantum computing.

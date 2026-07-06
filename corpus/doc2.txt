@@ -1,0 +1,15 @@
+Title: Cross-Site Scripting (XSS) Vulnerabilities
+Source: OWASP Foundation - Web Security Testing Guide
+
+Cross-Site Scripting (XSS) is a client-side code injection attack where an attacker injects malicious scripts into otherwise trusted websites. XSS attacks occur when an attacker uses a web application to send malicious code, generally in the form of a browser side script, to a different end user. The browser of the end user executes the malicious script because it appears to come from a trusted source.
+
+There are three primary types of XSS attacks:
+- Stored (Persistent) XSS: The malicious script is permanently stored on the target server. Every user who visits the affected page receives the malicious script. Comment sections and user profiles are common vectors.
+- Reflected (Non-Persistent) XSS: The malicious script is reflected off the web server, such as in an error message or search result. The attack is delivered via a specially crafted URL.
+- DOM-based XSS: The vulnerability exists in client-side code. The attack payload is executed by modifying the DOM environment in the victim's browser, without any server-side interaction.
+
+Consequences of successful XSS attacks include session hijacking, credential theft, keylogging, phishing, and full account takeover. Attackers can redirect users to malicious sites or deface web applications.
+
+Defences against XSS include output encoding (escaping special HTML characters), Content Security Policy (CSP) headers, input validation, using modern frameworks that auto-escape content (React, Angular), and HTTPOnly cookie flags to prevent JavaScript access to session cookies.
+
+The OWASP recommends using a combination of server-side input validation and context-aware output encoding as the most reliable defence strategy.

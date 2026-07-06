@@ -1,0 +1,15 @@
+Title: Introduction to SQL Injection Attacks
+Source: OWASP Foundation - Web Application Security Guide
+
+SQL injection (SQLi) is one of the most common and dangerous web application vulnerabilities. It occurs when an attacker inserts or "injects" malicious SQL code into a query that an application sends to its database. If successful, the attacker can read, modify, or delete data, execute administrative operations, and in some cases issue commands to the operating system.
+
+SQL injection attacks exploit insufficient input validation in web applications. When user-supplied input is not properly sanitised before being included in a SQL query, attackers can manipulate the query logic. For example, entering ' OR '1'='1 into a login form can bypass authentication entirely.
+
+There are three main types of SQL injection:
+- In-band SQLi: The attacker uses the same channel to both launch the attack and gather results. This includes Error-based SQLi (uses error messages to extract information) and Union-based SQLi (uses the UNION SQL operator to retrieve data from other tables).
+- Inferential (Blind) SQLi: No data is transferred via the web application. The attacker reconstructs the database structure by sending payloads and observing the application's response. Subtypes include Boolean-based and Time-based blind SQLi.
+- Out-of-band SQLi: Depends on features enabled on the database server. The attacker uses different channels to attack and retrieve data.
+
+Prevention strategies include using parameterised queries (prepared statements), stored procedures, input validation and whitelisting, applying the principle of least privilege to database accounts, and using Web Application Firewalls (WAFs). Regular security audits and penetration testing are also recommended.
+
+SQL injection remains listed in the OWASP Top 10 vulnerabilities consistently since its first publication.

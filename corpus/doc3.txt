@@ -1,0 +1,16 @@
+Title: Phishing Attacks and Social Engineering
+Source: NIST Cybersecurity Framework - User Awareness Guide
+
+Phishing is a type of social engineering attack in which an attacker impersonates a trustworthy entity to trick individuals into revealing sensitive information such as usernames, passwords, credit card numbers, or installing malicious software.
+
+Phishing attacks are typically carried out via email but increasingly occur through SMS (smishing), voice calls (vishing), and social media platforms. Attackers craft messages that appear legitimate by spoofing email addresses, mimicking brand visuals, and creating a sense of urgency.
+
+Common phishing techniques include:
+- Spear Phishing: Highly targeted attacks directed at specific individuals or organisations, often using personalised information gathered from social media or data breaches.
+- Whaling: Spear phishing aimed specifically at senior executives or high-value targets within organisations.
+- Clone Phishing: Attackers create a near-identical replica of a legitimate email, replacing links or attachments with malicious versions.
+- Business Email Compromise (BEC): Attackers impersonate executives or vendors to authorise fraudulent wire transfers or data requests.
+
+Technical indicators of phishing include mismatched URLs, suspicious sender domains, urgent language, unexpected attachments, and requests for credentials or financial information.
+
+Countermeasures include multi-factor authentication (MFA), email authentication protocols (SPF, DKIM, DMARC), employee security awareness training, anti-phishing browser extensions, and incident response plans. NIST guidelines recommend regular phishing simulation exercises as part of organisational security training.

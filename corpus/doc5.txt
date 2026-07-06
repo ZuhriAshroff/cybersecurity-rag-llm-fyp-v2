@@ -1,0 +1,18 @@
+Title: Network Security and Firewall Architecture
+Source: SANS Institute - Network Security Fundamentals
+
+Network security encompasses the policies, processes, and practices adopted to prevent, detect, and monitor unauthorised access, misuse, modification, or denial of a computer network and its accessible resources.
+
+Firewalls are the first line of defence in network security. They filter incoming and outgoing traffic based on defined security rules. Types of firewalls include:
+- Packet Filtering Firewalls: Inspect packets at the network layer and filter based on IP addresses, port numbers, and protocols.
+- Stateful Inspection Firewalls: Track the state of active connections and make filtering decisions based on context.
+- Application Layer (Proxy) Firewalls: Operate at the application layer, inspecting the full content of network traffic.
+- Next-Generation Firewalls (NGFW): Combine traditional firewall functions with deep packet inspection, intrusion prevention, and application awareness.
+
+Intrusion Detection Systems (IDS) and Intrusion Prevention Systems (IPS) monitor network traffic for suspicious activity. IDS logs and alerts on threats; IPS actively blocks them. Both can be signature-based (detecting known patterns) or anomaly-based (detecting deviations from normal behaviour).
+
+Network segmentation divides a network into smaller sub-networks (VLANs or subnets) to limit the blast radius of a breach. The principle of least privilege should be applied to network access controls.
+
+Virtual Private Networks (VPNs) create encrypted tunnels over public networks, providing secure remote access. Modern zero-trust network architectures (ZTNA) are replacing traditional VPN models by applying continuous verification rather than implicit trust within the network perimeter.
+
+Regular vulnerability scanning, penetration testing, and security information and event management (SIEM) systems are key components of a mature network security programme.
