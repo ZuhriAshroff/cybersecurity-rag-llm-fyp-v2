@@ -1,0 +1,40 @@
+Title: Buffer Overflow Vulnerabilities
+Source: OWASP Buffer Overflow Guide / MITRE CWE-119
+
+A buffer overflow occurs when a program writes more data to a fixed-size memory buffer than it can hold. The excess data overwrites adjacent memory regions, potentially corrupting data, crashing the application, or — most dangerously — allowing an attacker to overwrite return addresses and redirect execution to malicious code.
+
+Memory Layout and the Stack
+In compiled languages like C and C++, local variables are stored on the call stack. Each function call creates a stack frame containing local variables, saved registers, and the return address — the memory location the processor should jump to when the function returns. When user-supplied input is copied into a fixed-size stack buffer without length checking, input longer than the buffer size overwrites the return address.
+
+Classic Stack Smashing
+The prototypical stack-based overflow uses a payload structured as:
+1. Padding to fill the target buffer.
+2. Overwrite of the saved return address with the address of attacker-controlled memory.
+3. Shellcode (machine instructions) placed in the buffer or elsewhere in memory.
+
+When the vulnerable function returns, the processor jumps to the shellcode and executes it with the privileges of the vulnerable process. The 1988 Morris Worm used a buffer overflow in the Unix fingerd daemon as one of its propagation mechanisms, making this the oldest known exploited vulnerability class.
+
+Vulnerability Examples
+gets(), strcpy(), sprintf() and other C standard library functions that do not perform bounds checking are the classic sources. The call gets(buffer) will read input until a newline with no regard for the size of buffer. Microsoft's IIS server vulnerabilities in the early 2000s, the OpenSSL Heartbleed bug, and countless embedded device firmware bugs all stem from this class of error.
+
+Heap Overflows
+Heap-based overflows occur when dynamically allocated memory is overrun. Rather than overwriting return addresses, heap overflows corrupt heap metadata (free list pointers, chunk size fields) or overwrite function pointers stored adjacent to data, enabling control-flow hijacking through different mechanisms.
+
+Exploit Mitigations
+Modern systems deploy multiple layers of defence:
+
+Address Space Layout Randomisation (ASLR): Randomises the base addresses of the stack, heap, and loaded libraries at each execution. Attackers cannot hardcode target addresses, requiring an information leak to defeat.
+
+Stack Canaries: A random value (the canary) is placed between local variables and the return address. Before returning, the program checks the canary has not changed. Stack smashing overwrites the canary, triggering termination.
+
+Non-Executable Memory (NX/DEP): Marks stack and heap pages as non-executable. Even if an attacker overwrites the return address, jumping to injected shellcode fails because the CPU refuses to execute data pages.
+
+Safe Functions: Safe alternatives (strncpy, strncat, snprintf, fgets) accept a maximum length argument. Modern C compilers also warn about unsafe function use.
+
+Fortify Source: GCC's -D_FORTIFY_SOURCE flag adds runtime bounds checking to common string functions.
+
+Return-Oriented Programming (ROP)
+Attackers have adapted to NX and ASLR through ROP, which chains small existing code snippets (gadgets) ending in a RET instruction rather than injecting new code. ROP can defeat NX but typically still requires an ASLR bypass. Control-Flow Integrity (CFI) mitigations restrict valid jump targets to complicate ROP chain construction.
+
+Secure Development Practices
+Choose memory-safe languages (Rust, Go, Java, Python) for new projects where performance permits. For C/C++ codebases, use static analysis tools (Coverity, PVS-Studio, CodeQL), compiler hardening flags (-fstack-protector-all, -Wformat-security), and fuzz testing to discover overflows before attackers do.

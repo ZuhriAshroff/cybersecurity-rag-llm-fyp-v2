@@ -1,0 +1,40 @@
+Title: Advanced Persistent Threats (APT) — Tactics, Techniques, and Procedures
+Source: MITRE ATT&CK Framework / FireEye M-Trends Report
+
+An Advanced Persistent Threat (APT) is a prolonged, targeted cyberattack in which an adversary — typically a nation-state or sophisticated criminal group — gains and maintains unauthorised access to a target network for months or years. Unlike opportunistic attacks, APTs are characterised by specific targets (critical infrastructure, defence contractors, government agencies, financial institutions), substantial resources, and patient, stealthy tradecraft designed to avoid detection.
+
+APT Lifecycle
+The MITRE ATT&CK framework documents adversary TTPs (Tactics, Techniques, and Procedures) across the full attack lifecycle:
+
+Initial Access: Spear-phishing emails with weaponised attachments or links remain the most common initial vector, tailored to named individuals with contextually convincing lures. Other vectors include supply chain compromise, exploitation of public-facing applications, and trusted relationship abuse.
+
+Execution: Malicious code runs through scripting (PowerShell, VBScript, Python), exploitation of vulnerability, or living-off-the-land (LOL) techniques that abuse legitimate system tools (certutil.exe, regsvr32.exe, mshta.exe) to avoid detection.
+
+Persistence: Attackers establish footholds that survive reboots and credential changes: registry run keys, scheduled tasks, WMI event subscriptions, or implants in firmware and boot sectors.
+
+Privilege Escalation: Elevate from user to administrator or SYSTEM using local exploits, credential theft (Mimikatz extracting LSASS memory), Kerberoasting, or AS-REP Roasting.
+
+Defence Evasion: Obfuscate tools and traffic, disable security software, clear event logs, use signed binaries to bypass application whitelisting, and abuse process injection to hide malicious code inside legitimate processes.
+
+Credential Access: Dump credentials from LSASS memory, Active Directory NTDS.dit, credential manager, browser credential stores, or intercept authentication traffic.
+
+Discovery: Map the network, enumerate users, groups, trusts, and services using native tools (net.exe, nltest.exe, BloodHound for AD graph analysis).
+
+Lateral Movement: Move between hosts using stolen credentials (Pass-the-Hash, Pass-the-Ticket), remote service exploitation, or remote administration tools.
+
+Collection and Exfiltration: Stage data in compressed/encrypted archives, then exfiltrate over encrypted channels (HTTPS, DNS, cloud storage APIs) to avoid DLP detection.
+
+Notable APT Groups
+APT28 (Fancy Bear) — attributed to Russian GRU military intelligence — conducted the 2016 Democratic National Committee breach and numerous election-related operations. APT41 (Winnti Group) — attributed to Chinese state actors — conducts both nation-state espionage and financially motivated attacks simultaneously. Lazarus Group (DPRK) stole over $1.7B in cryptocurrency in 2022 to fund the North Korean weapons programme.
+
+Detection Strategies
+APTs are designed to evade signature-based detection. Effective defences rely on:
+
+- Comprehensive logging of PowerShell, WMI, process creation, network connections, and authentication events.
+- Behavioural detection rules in SIEM/EDR targeting specific ATT&CK techniques.
+- Threat hunting: proactive searches for indicators of compromise rather than waiting for alerts.
+- Network traffic analysis to identify C2 beaconing patterns, unusual DNS queries, and data staging.
+- Deception technology (honeypots, honeyaccounts) that attract and alert on attacker reconnaissance.
+
+Dwell Time
+The median time between initial intrusion and detection (dwell time) was 16 days globally in 2022 (FireEye M-Trends), down from 416 days in 2011 — reflecting improved detection capabilities but still representing significant windows for data theft.

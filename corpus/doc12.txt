@@ -1,0 +1,39 @@
+Title: Security Information and Event Management (SIEM)
+Source: NIST SP 800-92 — Guide to Computer Security Log Management / SANS Institute
+
+Security Information and Event Management (SIEM) systems aggregate, correlate, and analyse security event data from across an organisation's IT infrastructure in real time. By centralising log collection and applying detection rules and analytics, SIEMs enable security operations centre (SOC) teams to detect threats, investigate incidents, and demonstrate compliance.
+
+Core SIEM Functions
+Log aggregation: Collect logs from network devices (firewalls, routers, switches), servers (Windows Event Logs, syslog), endpoints (EDR agents), applications (web servers, databases), cloud services, and identity providers. Volume commonly ranges from millions to billions of events per day.
+
+Normalisation: Convert logs from heterogeneous formats into a consistent data model. Vendor-specific timestamps, field names, and event codes are mapped to standard schemas (e.g., OCSF — Open Cybersecurity Schema Framework).
+
+Correlation: Detection rules match patterns across multiple event sources over time windows. Example: "Alert if a user fails authentication 10 times within 5 minutes from one IP, then succeeds from a different country within 1 hour" — a credential stuffing indicator.
+
+Alerting and case management: Correlated detections create alerts routed to analysts. Integration with ticketing systems (ServiceNow, Jira) enables workflow management.
+
+Long-term retention: SIEMs store logs for compliance requirements — PCI DSS requires 12 months, with 3 months immediately available. Forensic investigations often require log data from months before an incident.
+
+Detection Approaches
+Signature-based rules: Static conditions matching known attack patterns (specific event IDs, known malicious hashes, CVE exploitation signatures). Low false positive rate but blind to novel attacks.
+
+Behavioural analytics (UEBA — User and Entity Behaviour Analytics): Machine learning establishes baselines of normal behaviour (login times, data volumes, access patterns) and alerts on significant deviations. Detects insider threats, compromised accounts, and unknown malware that evade signature detection.
+
+Threat intelligence integration: Feeds of known malicious IPs, domains, file hashes, and TTPs (MITRE ATT&CK) enrich SIEM events to identify connections to known threat actors.
+
+Common SIEM Use Cases
+- Detection of brute-force and password spray attacks against Active Directory.
+- Identification of data exfiltration via large outbound transfers to unusual destinations.
+- Privilege escalation detection (user added to Domain Admins, new service installed).
+- Lateral movement detection (unusual internal network connections, pass-the-hash indicators).
+- Compliance reporting for SOX, PCI DSS, HIPAA, and ISO 27001.
+
+Key SIEM Platforms
+Commercial: Splunk, Microsoft Sentinel, IBM QRadar, Exabeam, LogRhythm.
+Open source: Elastic Security (ELK Stack with detection rules), Wazuh, OSSIM.
+
+Challenges
+Alert fatigue from high false-positive rates is the primary operational challenge. SOC teams at large organisations may receive thousands of alerts per day; tuning rules to reduce noise while maintaining detection coverage requires continuous effort. The cost of ingesting large log volumes is also a significant constraint for cloud-native SIEMs that price per GB.
+
+SIEM and SOAR Integration
+Security Orchestration, Automation, and Response (SOAR) platforms extend SIEMs with automated playbook execution — automatically blocking a malicious IP at the firewall, disabling a compromised user account, or quarantining an endpoint — reducing mean time to respond (MTTR).

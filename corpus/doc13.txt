@@ -1,0 +1,35 @@
+Title: Intrusion Detection and Prevention Systems (IDS/IPS)
+Source: NIST SP 800-94 — Guide to Intrusion Detection and Prevention Systems
+
+Intrusion Detection Systems (IDS) and Intrusion Prevention Systems (IPS) monitor network traffic and host activity for signs of malicious behaviour. An IDS alerts security teams to potential attacks; an IPS adds the capability to automatically block or drop malicious traffic. Together they form a critical layer of defence-in-depth.
+
+IDS vs. IPS
+The distinction is deployment mode. An IDS is deployed out-of-band (passively receiving a copy of traffic via a network tap or SPAN port) and cannot block traffic in real time — it generates alerts for human review. An IPS is deployed inline, sitting in the direct path of traffic. When the IPS detects malicious traffic, it can drop packets, reset connections, or block the source IP without human intervention. False positives in an IPS block legitimate traffic, making tuning critical.
+
+Detection Methodologies
+Signature-based detection: Compares traffic against a library of known attack patterns (signatures). Fast and precise for known threats, but cannot detect novel attacks without updated signatures. Leading signature sets include those from Snort (community and Talos rules) and Suricata.
+
+Anomaly-based detection: Establishes a statistical model of normal traffic (baseline) and alerts when behaviour deviates significantly. Effective against zero-days and unknown malware but prone to false positives, especially during network changes.
+
+Stateful protocol analysis: Compares observed protocol behaviour against vendor-defined profiles of benign protocol use. Detects protocol violations and evasion techniques that exploit ambiguity in protocol implementation.
+
+Deployment Architectures
+Network-based IDS/IPS (NIDS/NIPS): Positioned at the network perimeter (border router/firewall), between network zones, or in the data centre. Monitors all traffic passing the sensor. Encrypted traffic (TLS) is opaque unless the IPS is configured for SSL inspection using a trusted root certificate.
+
+Host-based IDS (HIDS): Runs on individual endpoints and servers. Monitors system calls, file integrity, registry changes, log files, and network connections from the host's perspective. Can see decrypted application-layer content. Examples: OSSEC, Wazuh, Tripwire.
+
+Wireless IDS (WIDS): Monitors 802.11 RF spectrum for rogue access points, evil twin attacks, deauthentication floods, and WPA handshake capture attempts.
+
+Evasion Techniques
+Attackers actively try to bypass IDS/IPS:
+- Fragmentation: Split attack payloads across multiple IP fragments that the IDS does not reassemble.
+- Polymorphism: Encode shellcode differently to avoid matching static signatures.
+- Encryption: Use TLS to hide attack payloads from network sensors.
+- Low-and-slow: Conduct reconnaissance or brute force slowly to stay below rate-based thresholds.
+- Protocol ambiguity: Exploit differences in how IDS and endpoint interpret the same packet.
+
+Tuning and Management
+Effective IDS/IPS operation requires ongoing tuning to minimise false positives (reducing alert fatigue) while maintaining sensitivity to true threats. Processes include reviewing alert queues daily, correlating IDS alerts with other telemetry sources (SIEM, EDR), and regularly updating signature sets. IPS rules should be tested in IDS mode before enabling blocking to validate impact on legitimate traffic.
+
+Next-Generation IPS (NGIPS)
+Modern NGIPS solutions incorporate application awareness (identifying the application regardless of port), user identity awareness, threat intelligence feeds, and behavioural analytics. Vendors include Cisco Firepower, Palo Alto Networks, and Fortinet.

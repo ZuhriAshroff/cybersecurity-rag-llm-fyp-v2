@@ -1,0 +1,36 @@
+Title: Incident Response — Planning and Execution
+Source: NIST SP 800-61 Rev. 2 — Computer Security Incident Handling Guide
+
+Incident response (IR) is the organised process of detecting, containing, eradicating, and recovering from cybersecurity incidents. A well-executed IR process minimises damage, reduces recovery time and cost, and preserves evidence for legal proceedings. NIST defines four phases: Preparation, Detection and Analysis, Containment/Eradication/Recovery, and Post-Incident Activity.
+
+Phase 1 — Preparation
+Preparation is the most critical phase. Organisations should establish an IR team (CSIRT — Computer Security Incident Response Team) with clearly defined roles covering technical analysis, management escalation, legal, communications, and HR. Key preparation activities:
+
+- Develop and maintain an IR plan and playbooks for common incident types (ransomware, data breach, insider threat, DDoS).
+- Conduct tabletop exercises and simulation drills at least annually.
+- Deploy logging and monitoring infrastructure: SIEM, EDR, network flow analysis, and centralised log collection with sufficient retention.
+- Establish out-of-band communication channels for use when primary systems are compromised.
+- Maintain an asset inventory and data classification register.
+- Establish relationships with external responders, legal counsel, cyber insurers, and law enforcement in advance of incidents.
+
+Phase 2 — Detection and Analysis
+Most incidents are detected through SIEM alerts, EDR telemetry, antivirus detections, user reports, or third-party notification (threat intelligence feeds, government alerts, vendor breach notifications). Analysts must triage alerts by severity, correlate indicators across multiple data sources, and distinguish true incidents from false positives.
+
+Key analysis activities include timeline reconstruction, identification of patient zero (initial infection point), mapping of lateral movement, and scope assessment (which systems, data, and accounts are affected). Evidence must be preserved in a forensically sound manner — disk images, memory dumps, log exports — to maintain chain of custody.
+
+Severity classification (P1-P4 or similar) drives escalation and response urgency. P1 criteria typically include active exfiltration, ransomware deployment, compromise of privileged accounts, or impact to critical production systems.
+
+Phase 3 — Containment, Eradication, and Recovery
+Containment strategies depend on incident type. Short-term containment may mean isolating affected network segments or disabling compromised accounts. Long-term containment involves more surgical measures while remediation is prepared.
+
+Eradication removes the attacker's presence: deleting malware, closing access vectors, revoking compromised credentials, and applying patches. Recovery rebuilds affected systems from clean backups or gold images, verifies integrity, and gradually restores services with enhanced monitoring.
+
+Rushing recovery without full eradication allows attackers to maintain persistence and re-compromise the environment.
+
+Phase 4 — Post-Incident Activity
+A lessons-learned meeting held within two weeks should analyse root cause, identify detection and response gaps, and produce actionable improvements. Metrics to track: mean time to detect (MTTD), mean time to respond (MTTR), total cost of incident.
+
+Regulatory reporting obligations must be met within mandated timeframes: GDPR requires notification to supervisory authorities within 72 hours of becoming aware of a personal data breach.
+
+Incident Classification
+NIST defines incidents across eight categories: denial of service, malicious code, unauthorised access, inappropriate usage, scans/probes/attempted access, investigation, explained anomaly, and policy violation. Clear classification drives appropriate response procedures and supports trend analysis over time.

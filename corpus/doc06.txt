@@ -1,0 +1,37 @@
+Title: Ransomware Attacks — Mechanisms, Impact, and Defence
+Source: CISA Ransomware Guide / NIST SP 1800-25
+
+Ransomware is malicious software that encrypts a victim's files or locks access to systems and demands payment — typically in cryptocurrency — in exchange for a decryption key. It has evolved from a nuisance into one of the most financially devastating cyber threats facing organisations, governments, and critical infrastructure worldwide.
+
+How Ransomware Works
+Ransomware typically enters an environment through phishing emails containing malicious attachments or links, exploitation of unpatched vulnerabilities, compromised remote desktop protocol (RDP) credentials, or drive-by downloads from infected websites. Once executed, it performs several steps:
+
+1. Reconnaissance: Maps network shares, backup locations, and connected drives.
+2. Privilege escalation: Attempts to gain administrator or domain-level access.
+3. Lateral movement: Spreads to other hosts to maximise impact.
+4. Exfiltration (double extortion): Steals sensitive data before encrypting to use as additional leverage.
+5. Encryption: Uses symmetric encryption (AES-256) with the key protected by the attacker's asymmetric key (RSA-2048).
+6. Ransom note: Drops instructions in each encrypted directory.
+
+Notable Ransomware Families
+WannaCry (2017) exploited the EternalBlue vulnerability in Windows SMB, infecting over 200,000 systems in 150 countries. NotPetya disguised itself as ransomware but was a destructive wiper targeting Ukrainian infrastructure. REvil and Conti operated as Ransomware-as-a-Service (RaaS) platforms, allowing affiliates to deploy ransomware in exchange for a revenue cut. The Colonial Pipeline attack (2021) demonstrated ransomware's ability to disrupt critical physical infrastructure.
+
+Defence Strategies
+Offline backups following the 3-2-1 rule (three copies, two media types, one offsite) are the most effective recovery mechanism. Organisations should:
+
+- Patch operating systems and software promptly, especially internet-facing services.
+- Disable RDP where not required; use Network Level Authentication and MFA where it is.
+- Segment networks so ransomware cannot move laterally between zones.
+- Deploy endpoint detection and response (EDR) tools with behavioural analysis.
+- Conduct phishing simulation training for all staff.
+- Maintain and regularly test an incident response plan covering ransomware scenarios.
+- Use application whitelisting to prevent unauthorised executables from running.
+
+Payment Considerations
+Security agencies including CISA and the FBI advise against paying ransoms. Payment does not guarantee decryption, funds criminal organisations, and can expose victims to sanctions violations if the attacker is a designated entity. Even after payment, recovery time averages 21 days due to remediation complexity.
+
+Ransomware-as-a-Service
+The RaaS model has professionalised ransomware operations. Developers maintain the malware and negotiation infrastructure; affiliates carry out intrusions and receive 70-80% of ransom proceeds. This division of labour has lowered the technical barrier to entry and dramatically increased attack frequency.
+
+Regulatory Context
+Many jurisdictions now require organisations to report ransomware incidents within 72 hours (GDPR) or 24-72 hours (US critical infrastructure sectors under CIRCIA). Failure to report can result in fines that exceed the ransom itself.

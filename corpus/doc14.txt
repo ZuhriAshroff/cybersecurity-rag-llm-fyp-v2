@@ -1,0 +1,36 @@
+Title: Penetration Testing — Methodology and Phases
+Source: PTES (Penetration Testing Execution Standard) / OWASP Testing Guide v4
+
+Penetration testing (pen testing) is authorised simulated attack against a computer system, network, or application to identify exploitable vulnerabilities before malicious actors do. Unlike automated vulnerability scanning, penetration testing involves human creativity and chaining of vulnerabilities to demonstrate real-world attack impact. It is a core component of security assurance programmes and often mandated by standards including PCI DSS, ISO 27001, and SOC 2.
+
+Scope and Authorisation
+All penetration testing must be conducted under a written authorisation — a Rules of Engagement (RoE) document or Statement of Work — defining the target systems (in-scope), excluded systems (out-of-scope), testing windows, approved techniques, emergency contact procedures, and reporting requirements. Testing without authorisation constitutes computer crime under the Computer Fraud and Abuse Act (US), Computer Misuse Act (UK), and equivalent laws globally.
+
+Engagement Types
+Black-box: Testers begin with no information about the target, simulating an external attacker. Most realistic but least efficient.
+Grey-box: Testers have partial information (credentials, architecture diagrams, some source code). Balances realism with depth.
+White-box: Testers have full access to source code, architecture documentation, and credentials. Most thorough; simulates a malicious insider or leaked credentials.
+
+Red Team vs. Pen Test: Red team engagements are broader, objective-based simulations (reach this data, compromise this system) using stealthy techniques over weeks or months. Standard pen tests are more structured, time-boxed assessments of technical controls.
+
+PTES Methodology Phases
+
+1. Pre-engagement: Define scope, rules of engagement, legal authorisation, communication protocols.
+
+2. Intelligence gathering (OSINT): Enumerate subdomains, IP ranges, employees, technologies, and publicly exposed credentials using Shodan, LinkedIn, GitHub, Censys, and historical breach data.
+
+3. Threat modelling: Identify the most likely attackers and their objectives; prioritise testing effort accordingly.
+
+4. Vulnerability analysis: Automated scanning (Nessus, OpenVAS, Qualys) combined with manual analysis to identify missing patches, misconfigurations, and logic flaws.
+
+5. Exploitation: Attempt to exploit identified vulnerabilities using tools such as Metasploit, Burp Suite, custom scripts, and manual techniques. The goal is to demonstrate impact — access to sensitive data, privilege escalation, lateral movement.
+
+6. Post-exploitation: After initial access, assess lateral movement possibilities, data exfiltration paths, persistence mechanisms, and the ability to pivot to more sensitive systems.
+
+7. Reporting: Deliver a report containing an executive summary (business risk), technical findings with reproduction steps, CVSS scores, and prioritised remediation recommendations.
+
+Common Findings
+Top findings from external penetration tests include: exposed RDP, outdated VPN firmware, weak or default credentials, unpatched internet-facing services, and subdomain takeover. Internal tests frequently surface: Kerberoasting, Pass-the-Hash, misconfigured shares, legacy protocols (NTLM, SMBv1), and excessive domain user privileges.
+
+Responsible Disclosure of Findings
+All findings must be communicated to the client securely. Evidence of discovered data (credentials, PII, business data) should be minimised, stored securely, and destroyed after reporting. Testers must not retain client data or share findings with third parties.

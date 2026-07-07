@@ -1,0 +1,35 @@
+Title: Distributed Denial of Service (DDoS) Attacks
+Source: CISA Understanding DDoS Attacks / NIST SP 800-61
+
+A Distributed Denial of Service (DDoS) attack is an attempt to make an online service unavailable by overwhelming it with traffic from many compromised sources simultaneously. Unlike a simple DoS attack launched from a single host, DDoS attacks use networks of thousands to millions of infected machines — called botnets — making source-based blocking ineffective.
+
+Attack Categories
+DDoS attacks fall into three broad categories:
+
+Volumetric attacks flood the target's bandwidth with massive amounts of traffic. UDP floods, ICMP floods, and DNS amplification attacks belong here. Amplification attacks exploit protocols that return much larger responses than the initial request — DNS can amplify traffic by a factor of 28-54x, NTP by up to 556x.
+
+Protocol attacks consume processing capacity of network infrastructure rather than bandwidth. SYN floods exploit the TCP three-way handshake: the attacker sends many SYN packets with spoofed source IPs. The server allocates resources for each half-open connection, exhausting its connection table.
+
+Application layer (Layer 7) attacks target web application logic with HTTP GET/POST floods, Slowloris (keeping connections open with partial requests), or crafted queries that trigger expensive database operations. These can be effective with relatively low traffic volumes and are harder to distinguish from legitimate requests.
+
+Botnets and Infrastructure
+Modern DDoS attacks leverage IoT botnets (Mirai and successors), compromised cloud VMs, and reflection nodes. The Mirai botnet, which targeted Dyn DNS in 2016, generated over 1.2 Tbps of traffic — the largest recorded at the time — and disrupted Twitter, Netflix, and Reddit. Attacks exceeding 3 Tbps have been recorded since.
+
+Defences
+Upstream scrubbing: Internet service providers and specialist DDoS mitigation services (Cloudflare, Akamai, AWS Shield) scrub malicious traffic at their network perimeter before it reaches the customer's infrastructure. Traffic is redirected via BGP to scrubbing centres that filter attack packets and forward clean traffic.
+
+Anycast diffusion: Spreading the attack load across many geographically distributed nodes can absorb volumetric attacks.
+
+Rate limiting: Apply per-IP request limits at the edge, combined with CAPTCHA challenges for suspicious traffic patterns.
+
+SYN cookies: Replace stateful half-open connection tracking with a cryptographic cookie embedded in the TCP sequence number, eliminating the memory exhaustion vector.
+
+Content Delivery Networks (CDN): Distribute content across many edge nodes, reducing the impact of targeted attacks on a single origin.
+
+Network Access Control Lists (ACLs): Block known attack sources and anomalous traffic patterns at the border router level.
+
+Incident Metrics
+DDoS attacks are measured by volume (Gbps/Tbps), packet rate (Mpps — millions of packets per second), and duration. Short high-volume bursts lasting minutes can bypass some automated defences. Some campaigns use multi-vector attacks combining volumetric, protocol, and application-layer techniques to overwhelm diverse defence mechanisms simultaneously.
+
+Legal Context
+Launching DDoS attacks is illegal under the Computer Fraud and Abuse Act (US), the Computer Misuse Act (UK), and equivalent legislation globally. Selling or renting DDoS-for-hire services (booter/stresser services) is also prosecutable.

@@ -1,0 +1,36 @@
+Title: Zero-Day Vulnerabilities and Exploit Markets
+Source: NIST NVD / MITRE CVE Program / Cybersecurity and Infrastructure Security Agency
+
+A zero-day vulnerability is a security flaw in software or hardware that is unknown to the vendor and therefore has no available patch. The term "zero-day" refers to the vendor having had zero days to develop and deploy a fix. Once exploited in the wild, a zero-day becomes an "N-day" — a known vulnerability for which a patch exists but may not yet be deployed.
+
+Discovery and Lifecycle
+Zero-days are discovered through manual code review, fuzzing (automated testing with malformed inputs), reverse engineering of patches from similar products, and binary diffing of software updates. The period between private discovery and public disclosure — during which only the discoverer (and potentially buyers) know of the vulnerability — is the zero-day window of exposure.
+
+Vendors typically receive vulnerability reports through coordinated disclosure programs (bug bounties) or government-mandated disclosure frameworks. Upon receiving a report, they work to develop and test a patch, typically releasing it within 90 days (Google Project Zero's standard disclosure deadline) or more urgently for actively exploited vulnerabilities.
+
+Exploit Markets and Weaponisation
+A shadow economy surrounds zero-day exploits. Three market segments exist:
+
+White market: Vendor bug bounty programs pay researchers from hundreds to millions of dollars depending on severity and exploitability. Google paid over $12M in bug bounties in 2022. Apple offers up to $2M for certain iPhone zero-clicks.
+
+Grey market: Firms like Zerodium purchase exploits from researchers and sell them to government clients (law enforcement, intelligence agencies). Prices for a fully weaponised iOS zero-click remote code execution exploit have reached $2.5M.
+
+Black market: Criminal forums sell exploits to financially motivated attackers. Prices correlate with patch status, reliability, and target prevalence.
+
+Notable Zero-Day Exploits
+Stuxnet (2010) used four simultaneous Windows zero-days — the highest number ever recorded in a single piece of malware — alongside two stolen digital certificates to sabotage Iranian uranium enrichment centrifuges. EternalBlue (CVE-2017-0144), a Windows SMB zero-day developed by the NSA and leaked by Shadow Brokers, was weaponised in WannaCry and NotPetya within weeks. Log4Shell (CVE-2021-44228), a zero-day in the ubiquitous Log4j logging library, allowed unauthenticated remote code execution with minimal effort and affected hundreds of millions of systems.
+
+Vulnerability Scoring
+The Common Vulnerability Scoring System (CVSS v3.1) provides a standardised severity score from 0-10 based on attack vector, complexity, privileges required, user interaction, scope, and impact on confidentiality, integrity, and availability. Critical vulnerabilities score 9.0-10.0 and warrant emergency patching.
+
+Defences Against Zero-Day Exploitation
+Since no patch exists by definition, defence relies on reducing attack surface and detecting exploitation:
+
+- Network segmentation limits lateral movement after initial compromise.
+- Least-privilege principles restrict what a compromised process can access.
+- Behavioural detection (EDR, anomaly-based IDS) identifies exploitation patterns like unusual memory allocation, child process creation, or network connections from application processes.
+- Application sandboxing (browser renderer isolation, containerisation) contains the impact of successful exploitation.
+- Prompt patching of N-days is critical — attackers exploit known CVEs far more frequently than zero-days.
+
+Vulnerability Disclosure Policy
+Responsible disclosure (coordinated disclosure) balances giving vendors time to patch against the public's need to know about active risks. Full immediate disclosure pressures vendors but exposes users. The 90-day industry standard attempts to balance these concerns.

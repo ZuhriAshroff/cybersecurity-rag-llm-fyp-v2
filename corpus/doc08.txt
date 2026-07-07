@@ -1,0 +1,37 @@
+Title: Man-in-the-Middle (MitM) Attacks
+Source: OWASP Transport Layer Protection Cheat Sheet / NIST SP 800-63
+
+A man-in-the-middle (MitM) attack occurs when an adversary secretly intercepts and potentially alters communications between two parties who believe they are communicating directly with each other. The attacker sits between the victim and the legitimate service, able to eavesdrop, modify, or inject data in real time.
+
+Common MitM Techniques
+
+ARP Spoofing (ARP Poisoning): The Address Resolution Protocol maps IP addresses to MAC addresses on local networks. An attacker broadcasts forged ARP replies that associate their MAC address with the IP of the default gateway or another host. Packets intended for that host are redirected to the attacker, who forwards them on — giving the appearance of a normal connection while capturing all traffic.
+
+DNS Spoofing: Corrupt a victim's DNS cache with false records so domain name lookups return the attacker's IP instead of the legitimate server. Traffic is directed to a malicious server that can present a convincing clone of the intended site.
+
+SSL Stripping: The attacker intercepts an HTTPS request and relays it over HTTP to the victim, while maintaining HTTPS with the legitimate server. The victim sees an HTTP site (no padlock) but assumes the connection is secure. sslstrip, released by Moxie Marlinspike in 2009, demonstrated this attack against real-world banks.
+
+Evil Twin / Rogue Access Point: A fake Wi-Fi access point is set up with the same SSID as a trusted network (coffee shop, airport, hotel). Victims connect to the rogue AP, routing all traffic through the attacker's device.
+
+HTTPS Interception via Certificate Attacks: An attacker with a valid certificate (obtained through a compromised CA, certificate misissuance, or by installing a rogue root cert on a managed device) can decrypt TLS traffic at a proxy.
+
+BGP Hijacking: At the network level, falsely advertising more specific routes via BGP can divert internet traffic for large IP address blocks through an attacker-controlled autonomous system.
+
+Defences
+
+TLS/HTTPS: Encrypt traffic end-to-end. Without the private key, an interceptor sees only ciphertext.
+
+HTTP Strict Transport Security (HSTS): The Strict-Transport-Security header instructs browsers to always use HTTPS for a domain, preventing SSL stripping.
+
+Certificate Pinning: Embed the expected server certificate or public key hash in the application. Rejects any certificate not matching, even a validly signed one from a trusted CA.
+
+DNSSEC: Cryptographically sign DNS records so spoofed responses are detected.
+
+Mutual TLS (mTLS): Both client and server authenticate with certificates, preventing impersonation of either party.
+
+Network Monitoring: Detect ARP spoofing with tools that flag multiple IP-to-MAC conflicts, or use Dynamic ARP Inspection (DAI) on managed switches.
+
+VPN on Untrusted Networks: Encrypts all traffic from the client to the VPN gateway, protecting against local network attacks like evil twin and ARP poisoning.
+
+Practical Impact
+MitM attacks enable session hijacking (stealing authenticated session cookies), credential theft, data exfiltration, and transaction manipulation. Financial services, healthcare, and government sectors are primary targets due to the sensitivity of transmitted data.
