@@ -1,0 +1,35 @@
+Title: Identity and Access Management (IAM) Principles
+Source: NIST SP 800-162 — Guide to Attribute Based Access Control / ISO/IEC 27001 Annex A.9
+
+Identity and Access Management (IAM) is the discipline of ensuring that the right people and systems have the right access to the right resources at the right time — and no more. IAM encompasses identity lifecycle management, authentication, authorisation, and privileged access governance. Failures in IAM are implicated in the majority of major breaches.
+
+Core IAM Concepts
+
+Identification: Claiming an identity (username, email address, certificate subject).
+Authentication: Proving the claimed identity (password, MFA, certificate private key).
+Authorisation: Determining what the authenticated identity is permitted to do.
+Accounting/Audit: Logging what the identity did and when.
+
+Access Control Models
+Discretionary Access Control (DAC): Resource owners control who can access their resources. Traditional Unix file permissions (owner/group/other rwx) are DAC. Flexible but difficult to manage at scale.
+
+Mandatory Access Control (MAC): The system enforces access based on classification labels (Top Secret, Secret, Unclassified) and subject clearances. Common in government and military systems (SELinux). Difficult to manage but provides strong separation.
+
+Role-Based Access Control (RBAC): Users are assigned roles (Administrator, Analyst, Read-Only); permissions are assigned to roles rather than directly to users. Simplifies administration — changing a role's permissions applies to all role members. Most enterprise systems use RBAC.
+
+Attribute-Based Access Control (ABAC): Access decisions use multiple attributes of the subject, resource, action, and environment (user department, resource classification, action type, time of day, location). More flexible and fine-grained than RBAC but more complex to implement.
+
+Principle of Least Privilege
+Users and systems should have only the minimum access required to perform their function, for the minimum time required. Least privilege reduces the blast radius of compromised accounts, insider threats, and malware. In practice: limit default user rights, use separate admin accounts for elevated tasks, implement just-in-time access elevation, and regularly review and revoke unnecessary access.
+
+Identity Lifecycle Management
+Joiner-Mover-Leaver processes must ensure access is provisioned when someone joins, adjusted when they change role, and fully revoked when they leave — particularly critical for the leaver process. Orphaned accounts (accounts whose owners have left) are a consistent finding in security audits.
+
+Privileged Access Management (PAM)
+Privileged accounts (domain admin, root, cloud IAM admin) represent the highest-value targets for attackers. PAM solutions (CyberArk, BeyondTrust, Delinea) vault privileged credentials, require approval workflows for access, rotate passwords automatically, and record all privileged sessions for audit purposes.
+
+Federated Identity and SSO
+Federation extends identity across organisational boundaries using standards like SAML 2.0 and OpenID Connect (OIDC). Single Sign-On (SSO) allows users to authenticate once to an identity provider and access multiple service providers without re-authenticating. OAuth 2.0 provides delegated authorisation for API access. These protocols reduce password sprawl but make the identity provider a critical single point of security — it must be hardened accordingly.
+
+Zero Trust Identity
+Zero Trust architectures treat identity as the new perimeter: every access request is fully authenticated and authorised regardless of network location. Continuous validation, device health checks, and risk-based authentication (adaptive MFA) are implemented at the identity layer rather than relying on network perimeter controls.

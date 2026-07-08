@@ -1,0 +1,39 @@
+Title: TLS/SSL Protocol — Security and Configuration
+Source: NIST SP 800-52 Rev. 2 — Guidelines for TLS Implementations / OWASP Transport Layer Security Cheat Sheet
+
+Transport Layer Security (TLS) is the cryptographic protocol that secures the majority of internet communications — HTTPS, email (SMTPS, STARTTLS), VPN, and many application protocols. TLS provides confidentiality (encryption), integrity (authentication tags), and authentication (certificate verification). Its predecessor SSL is obsolete and insecure; the terms are often used interchangeably but TLS 1.2 and 1.3 are the current standards.
+
+TLS Handshake (TLS 1.3)
+TLS 1.3, standardised in RFC 8446 (2018), dramatically simplified and improved the handshake:
+
+1. Client Hello: Client sends supported cipher suites, a random value, and key shares (Diffie-Hellman public values for supported groups).
+2. Server Hello: Server selects cipher suite, sends its key share and certificate. With the shared DH values, both parties derive the session keys immediately — encryption begins from the server's second message.
+3. Certificate verification and Finished messages authenticate the handshake.
+4. Application data flows encrypted.
+
+TLS 1.3 reduces the handshake from 2 round trips (TLS 1.2) to 1 round trip, and enables 0-RTT resumption (sending application data with the first packet on resumed sessions, at the cost of replay attack risk).
+
+Cipher Suites
+TLS 1.3 allows only five cipher suites, all providing forward secrecy: TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256, and two others. Forward secrecy (PFS — Perfect Forward Secrecy) means compromise of the server's long-term private key does not decrypt past sessions, because each session uses ephemeral DH key exchange.
+
+TLS 1.2 supports many legacy cipher suites including weak ones (RC4, 3DES, export-grade ciphers) that should be disabled. NIST SP 800-52 Rev. 2 mandates TLS 1.2 minimum for federal systems and recommends TLS 1.3.
+
+Certificate Validation
+Clients validate server certificates by checking: the certificate chain leads to a trusted root CA; the certificate has not expired; the certificate has not been revoked (via OCSP or CRL); the certificate's Subject Alternative Name (SAN) matches the hostname being accessed.
+
+Certificate Transparency (CT): All publicly trusted certificates must be logged in CT logs, enabling detection of certificates misisssued for domains without the domain owner's knowledge.
+
+Certificate Pinning: Applications hardcode the expected server certificate or CA, rejecting any certificate not matching — preventing attacks that use alternative trusted certificates.
+
+Common TLS Misconfigurations
+Self-signed certificates: Accepted by users who click through browser warnings, enabling MitM attacks. Use CA-issued certificates in production.
+Expired certificates: Certificates must be renewed before expiry; automated tools (Let's Encrypt's ACME protocol, cert-manager in Kubernetes) eliminate manual renewal.
+Mixed content: HTTPS pages loading resources (scripts, images) over HTTP expose those resources to tampering.
+Weak cipher suites enabled: Disable SSLv3, TLS 1.0, TLS 1.1, RC4, DES, 3DES, export ciphers, and null cipher suites.
+Missing HSTS: Without Strict-Transport-Security headers, browsers may attempt HTTP connections on first visit.
+
+HSTS Preloading
+Sites can be submitted to browser HSTS preload lists, hardcoding HTTPS enforcement in browser distributions. This eliminates the first-visit vulnerability window before the browser has seen the HSTS header.
+
+TLS Inspection
+Enterprise proxies and next-generation firewalls perform TLS inspection (SSL/TLS interception) by acting as a MitM using a trusted enterprise root certificate installed on managed endpoints. This allows inspection of encrypted traffic for DLP and malware detection but requires careful management of the enterprise CA.

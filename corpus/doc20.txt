@@ -1,0 +1,44 @@
+Title: Malware Analysis — Static, Dynamic, and Behavioural Techniques
+Source: SANS FOR610 Malware Analysis / NIST SP 800-83
+
+Malware analysis is the process of understanding the purpose, functionality, and potential impact of a malicious software sample. Analysts reverse-engineer malware to develop detection signatures, understand attacker capabilities, extract indicators of compromise (IoCs), and support incident response. Analysis falls into three primary approaches: static, dynamic, and hybrid.
+
+Static Analysis
+Static analysis examines the malware file without executing it.
+
+File profiling: Compute cryptographic hashes (MD5, SHA-256) to search threat intelligence databases (VirusTotal, MalwareBazaar). Check file format, size, compilation timestamp, and sections.
+
+String extraction: Extract printable strings to find URLs, IP addresses, registry keys, file paths, encryption keys, and error messages that reveal functionality.
+
+Disassembly: Use disassemblers (IDA Pro, Ghidra, Binary Ninja, Radare2) to convert machine code back to assembly language. Identify key functions, control flow, and algorithms. Recognise cryptographic routines, network communication code, and anti-analysis tricks.
+
+Import analysis: The DLL imports listed in the PE header reveal the Windows API functions the malware calls — WinExec suggests process execution, CryptEncrypt suggests encryption, WSASend/recv suggests network communication, RegSetValueEx suggests registry persistence.
+
+Packed and obfuscated samples: Many malware families use packers (UPX, custom) or encryption to conceal their true code, making static analysis of the packed stub only partially useful. Dynamic analysis is required to unpack.
+
+Dynamic Analysis
+Dynamic analysis executes the malware in a controlled, isolated environment (sandbox) and observes its behaviour.
+
+Sandboxing: Automated sandboxes (Cuckoo, Any.run, Joe Sandbox, Hybrid Analysis) detonate samples and log file system changes, registry modifications, network connections, process creation, and API calls. Analysis takes minutes.
+
+Manual dynamic analysis: Run the sample in an isolated VM, monitoring with Process Monitor, Wireshark, Regshot (registry diff), and API Monitor. Allows interaction that automated sandboxes miss (clicking buttons, entering passwords).
+
+Network simulation: Use tools like FakeNet-NG or INetSim to simulate DNS, HTTP, and other network services, causing malware to reveal C2 infrastructure and communication protocols without establishing real outbound connections.
+
+Anti-analysis Evasion
+Malware actively tries to detect analysis environments:
+- VM detection: Check for VMware/VirtualBox specific registry keys, files, MAC address prefixes, or timing anomalies.
+- Sandbox evasion: Delay execution, check for user interaction (mouse movement, running processes), or check network connectivity before activating.
+- Debugger detection: Use IsDebuggerPresent(), timing checks, or exception-based tricks.
+
+Analysts counter these by modifying VMs to appear more realistic, patching detection routines in memory, and using bare-metal analysis for sophisticated samples.
+
+Indicators of Compromise (IoCs)
+Analysis produces IoCs used for detection and hunting:
+- File hashes (MD5, SHA-256) for the sample and dropped files.
+- Network IoCs: C2 IP addresses, domains, URLs, user-agents, SSL certificate fingerprints.
+- Host IoCs: Registry keys, file paths, mutex names, scheduled task names, service names.
+- Behavioural IoCs: Process injection patterns, YARA rules matching code sequences.
+
+YARA Rules
+YARA is a pattern-matching language used to create malware detection signatures based on strings, byte sequences, and logical conditions found through static analysis. YARA rules are shared in threat intelligence communities and integrated into endpoint security products.

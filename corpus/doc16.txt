@@ -1,0 +1,35 @@
+Title: Multi-Factor Authentication (MFA) and Authentication Security
+Source: NIST SP 800-63B — Digital Identity Guidelines / CISA MFA Guidance
+
+Authentication is the process of verifying that a party is who they claim to be. Weak authentication is the leading cause of account compromise — the 2022 Verizon DBIR found that over 80% of hacking-related breaches involved stolen or brute-forced credentials. Multi-factor authentication (MFA) dramatically reduces account compromise risk by requiring evidence from multiple distinct categories.
+
+Authentication Factors
+Something you know: Passwords, PINs, security questions. Passwords are the most common authentication mechanism but are frequently reused, phished, or exposed in data breaches. NIST SP 800-63B now recommends against mandatory password rotation (which drives predictable patterns) and instead focuses on breach detection and length.
+
+Something you have: Physical tokens, smart cards, mobile authenticator apps (TOTP — Time-based One-Time Password per RFC 6238), hardware security keys (FIDO2/WebAuthn). Possession factors significantly raise the cost of remote account compromise.
+
+Something you are: Biometrics — fingerprint, facial recognition, iris scan, voice recognition. Biometrics authenticate locally (device verifies biometric, then uses a cryptographic key) and are not transmitted to servers, addressing the fear of server-side biometric compromise.
+
+MFA Methods and Their Strength
+SMS OTP: A one-time code delivered via text message. Vulnerable to SIM swapping (attacker convinces carrier to transfer victim's number to attacker's SIM), SS7 protocol attacks, and malware that intercepts SMS. NIST RESTRICTED SMS OTP as a second factor in federal systems.
+
+TOTP Apps (Google Authenticator, Authy, Microsoft Authenticator): Generate 6-8 digit codes refreshing every 30 seconds based on a shared secret and current time. More secure than SMS but vulnerable to real-time phishing (attacker relays the code immediately).
+
+Push Notifications: Authenticator app sends a push notification to the user's device. Susceptible to MFA fatigue attacks — attackers repeatedly trigger push requests until the exhausted user approves one.
+
+Hardware Security Keys (FIDO2/WebAuthn): The strongest MFA mechanism. The key generates a public-private key pair per site; authentication is a cryptographic challenge-response that includes the site's origin. Completely phishing-resistant because the key refuses to authenticate to incorrect domains.
+
+Passkeys: FIDO2 credentials stored on a device (or synchronised across devices via iCloud Keychain, Google Password Manager). Replace passwords entirely with public-key cryptography. Major platforms (Apple, Google, Microsoft) launched passkey support in 2022-2023.
+
+Password Best Practices (NIST 800-63B)
+- Minimum 8 characters; allow up to 64.
+- Check new passwords against known-breach password lists (Have I Been Pwned).
+- Do not impose character composition rules or expiry unless breach is suspected.
+- Allow paste and password manager use.
+- Implement rate limiting and account lockout for login attempts.
+
+Credential Stuffing
+Attackers use lists of username/password pairs from prior breaches — billions available — to attempt login across many sites, exploiting password reuse. MFA blocks credential stuffing regardless of password validity.
+
+Privileged Access
+Privileged accounts (domain admins, root, cloud IAM admins) warrant the strongest authentication controls: hardware security keys, just-in-time privileged access management (PAM), and session recording. CISA's Cybersecurity Performance Goals list MFA for all privileged access as a priority control.

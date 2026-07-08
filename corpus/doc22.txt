@@ -1,0 +1,40 @@
+Title: Vulnerability Management — Identification, Prioritisation, and Remediation
+Source: NIST SP 800-40 Rev. 4 — Guide to Enterprise Patch Management Planning / CISA Known Exploited Vulnerabilities Catalogue
+
+Vulnerability management is the continuous, proactive process of identifying, classifying, prioritising, remediating, and verifying security weaknesses in an organisation's systems and software. Effective vulnerability management is fundamental to security hygiene and required by most compliance frameworks.
+
+Vulnerability Discovery
+Internal scanning: Authenticated vulnerability scanners (Tenable Nessus, Qualys VMDR, Rapid7 InsightVM) probe all network-connected assets for known CVEs, missing patches, misconfigurations, and weak settings. Authenticated scans (using service account credentials to log into each target) provide far more complete results than unauthenticated scans.
+
+Agent-based scanning: Lightweight agents deployed on endpoints and servers scan from the inside without network connectivity requirements, essential for laptops, cloud instances, and remote workers.
+
+External attack surface management (EASM): Continuously discovers and assesses internet-facing assets, including shadow IT and forgotten subdomains the organisation may not know it has.
+
+Threat intelligence enrichment: Correlate CVEs found in the environment with exploitation intelligence — is this CVE being actively exploited in the wild? Does it appear in the CISA KEV (Known Exploited Vulnerabilities) catalogue? This transforms a raw list of findings into an exploitation-probability-weighted risk register.
+
+Prioritisation
+The CVSS score alone is insufficient for prioritisation — a CVSS 9.8 vulnerability on an isolated internal system with no exposure may be less urgent than a CVSS 6.5 vulnerability on an internet-facing server actively exploited in campaigns. Effective prioritisation frameworks:
+
+CISA KEV: CISA's catalogue of CVEs with evidence of active exploitation in the wild. Federal agencies must patch KEV vulnerabilities within mandated timeframes (typically 2-3 weeks). Organisations should treat KEV CVEs as urgent regardless of CVSS.
+
+EPSS (Exploit Prediction Scoring System): A machine learning model trained on threat intelligence data that predicts the probability a CVE will be exploited in the next 30 days. Complements CVSS by adding exploitation likelihood.
+
+Contextual risk: Adjust priority based on asset criticality (internet-facing vs. internal, business impact), compensating controls (is the service isolated? behind a WAF?), and data sensitivity.
+
+Remediation
+Patching is the preferred remediation. Most enterprises operate on patch cycles: critical patches within 24-72 hours, high within 7-14 days, medium within 30 days, low within 90 days. Exceptions require documented risk acceptance.
+
+When patching is not immediately possible (operational constraints, vendor delays, end-of-life systems), apply compensating controls: WAF rules to block exploitation, network segmentation to isolate the vulnerable system, disabling affected features, or enhanced monitoring.
+
+End-of-life (EOL) software no longer receiving security updates is a chronic vulnerability management challenge. EOL Windows versions (XP, Server 2003/2008) and EOL applications must be migrated or isolated.
+
+Metrics and SLA Tracking
+Key vulnerability management metrics:
+- Mean time to remediate (MTTR) by severity tier.
+- Percentage of critical/high vulnerabilities remediated within SLA.
+- Vulnerability density per asset (vulnerabilities per system).
+- Patch compliance rate by operating system and application category.
+- Number of assets in KEV exposure window.
+
+Continuous Improvement
+Vulnerability management programmes mature through automation (integration with ITSM for automated ticket creation), expanded coverage (IoT, OT/ICS, cloud, containers), and risk-based reporting to executive stakeholders.

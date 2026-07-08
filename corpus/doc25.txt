@@ -1,0 +1,37 @@
+Title: Digital Forensics and Incident Investigation
+Source: NIST SP 800-86 — Guide to Integrating Forensic Techniques into Incident Response
+
+Digital forensics is the application of scientific methods to the identification, preservation, extraction, and documentation of digital evidence for use in legal proceedings or security investigations. It supports incident response by answering: what happened, when, how, and who was responsible.
+
+Forensic Principles
+Evidence integrity: Digital evidence is fragile and can be altered by examining it. Forensic processes preserve evidence by working from copies (forensic images) rather than original media, and by computing and verifying cryptographic hashes (MD5, SHA-256) of all evidence items.
+
+Chain of custody: Documentation tracking who collected evidence, when, where, how, and who had subsequent access to it. Essential for evidence admissibility in legal proceedings.
+
+Forensic soundness: Collection and analysis methods must not alter evidence. Write blockers prevent any writes to original storage media during imaging. Memory acquisition tools must minimise OS calls that could overwrite memory contents.
+
+Evidence Sources
+Disk forensics: Full bit-level copies (forensic images) of hard drives and SSDs using tools like FTK Imager, dd, or dcfldd. Analysis with Autopsy, EnCase, or FTK reveals deleted files (recovered from unallocated space), file metadata, browser history, recent documents, USB connection history, user account activity, and application artifacts.
+
+Memory forensics: RAM contains running processes, decrypted data, network connections, registry hives, and often encryption keys that are absent from disk. Volatility Framework analyses memory dumps, identifying injected code, hidden processes, network sockets, and extracted artefacts.
+
+Network forensics: Full packet capture (PCAP) from network taps, or NetFlow/IPFIX records for metadata (no payload). Wireshark, NetworkMiner, and Zeek analyse network evidence. Network forensics reconstructs attacker C2 communication, data exfiltration, and lateral movement.
+
+Log forensics: Operating system event logs (Windows EVTX, syslog), web server access logs, application logs, and authentication logs. Windows Event IDs 4624 (logon), 4688 (process creation), 4698 (scheduled task), and 7045 (service installed) are key forensic artefacts.
+
+Mobile forensics: Cellebrite UFED and similar tools extract data from smartphones including messages, call records, app data, location history, and deleted content.
+
+Timeline Analysis
+Reconstructing a timeline of attacker activity is central to forensic investigation. Timestamps from file system metadata (MACB — Modified, Accessed, Changed, Born), event logs, network flows, and application logs are correlated into a unified timeline. Super Timeline tools (log2timeline/Plaso) automate timeline creation from multiple evidence sources.
+
+Anti-Forensics
+Attackers attempt to hinder forensic investigation through:
+- Log clearing: Clearing Windows event logs (Event ID 1102 or 104) or deleting Unix syslog entries.
+- Timestomping: Modifying file timestamp metadata using tools like Metasploit's timestomp module.
+- Secure deletion: Overwriting data before deletion to prevent recovery.
+- Encryption: Encrypting attacker tools and exfiltrated data.
+
+Forensic analysts can often detect anti-forensics — cleared logs leave their own event (ID 1102), and $MFT (Master File Table) timeline inconsistencies reveal timestomping.
+
+Legal Considerations
+Evidence collected for criminal prosecution must meet admissibility standards (Daubert standard in US federal courts). Security teams conducting corporate investigations must understand the boundary between corporate policy investigations (lower evidentiary standard) and matters that may lead to criminal prosecution (requiring forensic-grade collection from the outset). Engaging legal counsel early is essential.

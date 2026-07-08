@@ -1,0 +1,35 @@
+Title: Cloud Security — Risks, Shared Responsibility, and Controls
+Source: CSA Cloud Controls Matrix v4 / NIST SP 800-144 — Guidelines on Security and Privacy in Public Cloud Computing
+
+Cloud computing delivers on-demand computing resources (compute, storage, networking, software) over the internet. Major service models include IaaS (Infrastructure as a Service), PaaS (Platform as a Service), and SaaS (Software as a Service). Security responsibilities shift between the cloud provider and customer depending on the service model — the shared responsibility model.
+
+Shared Responsibility Model
+The cloud provider is always responsible for the security OF the cloud — physical infrastructure, hypervisors, network fabric, and the underlying hardware. The customer is responsible for security IN the cloud — everything they deploy or configure.
+
+In IaaS (AWS EC2, Azure VMs, GCP Compute): Customer manages OS, applications, data, identity, and network controls.
+In PaaS (AWS Elastic Beanstalk, Azure App Service): Customer manages applications and data; provider manages OS and runtime.
+In SaaS (Office 365, Salesforce, Workday): Provider manages virtually everything; customer manages users, access controls, and data classification.
+
+Misunderstanding shared responsibility is a leading cause of cloud breaches. The 2019 Capital One breach occurred because a misconfigured WAF on an EC2 instance allowed SSRF access to instance metadata, exposing AWS credentials. The cloud infrastructure was not breached — the customer's configuration was.
+
+Top Cloud Security Risks
+Identity and Access Misconfiguration: Over-permissive IAM roles, publicly accessible S3 buckets, and storage accounts exposed to the internet are among the most common cloud security findings. The "confused deputy" problem can arise when IAM roles are assumed across accounts without proper restrictions.
+
+API Security: Cloud environments are managed entirely through APIs. Exposed or poorly secured management APIs are attractive targets. Use API gateways, OAuth 2.0/OIDC for authentication, and audit all API access.
+
+Data Exposure: Cloud storage (S3, Azure Blob, GCS) is private by default but can be misconfigured to public. Continuous Cloud Security Posture Management (CSPM) tools scan for misconfigured storage, open security groups, and disabled encryption.
+
+Insecure Workloads: Unpatched container images, publicly exposed management ports (RDP on 0.0.0.0/0 in security groups), and default credentials in deployed services.
+
+Key Security Controls
+
+Identity: Enforce MFA on all IAM users and root/global admin accounts. Use roles instead of long-lived access keys. Rotate credentials; use AWS Secrets Manager or similar for application credentials.
+
+Network: Use Virtual Private Clouds (VPCs) with private subnets for backend resources. Security groups and Network ACLs follow least-privilege. Use VPC endpoints to access cloud services without traversing the internet.
+
+Encryption: Enable encryption at rest for all storage (S3, EBS, RDS) using provider-managed or customer-managed KMS keys. Enforce TLS for all data in transit. Use envelope encryption for sensitive data.
+
+Logging and Monitoring: Enable CloudTrail (AWS), Azure Monitor/Activity Log, GCP Cloud Audit Logs. Stream to a SIEM. Alert on root account use, unusual API calls, and security group changes.
+
+Cloud Security Posture Management (CSPM)
+CSPM tools (Wiz, Orca Security, Prisma Cloud) continuously assess cloud environments against security benchmarks (CIS Benchmarks, NIST, CSA CCM) and compliance frameworks, providing risk-based visibility without requiring agents.

@@ -1,0 +1,35 @@
+Title: Endpoint Detection and Response (EDR) and Endpoint Security
+Source: NIST SP 800-83 Rev. 1 — Guide to Malware Incident Prevention / Gartner EDR Market Guide
+
+Endpoint security encompasses the controls deployed on end-user devices (laptops, desktops, servers) to prevent, detect, and respond to threats. Modern endpoint security has evolved far beyond traditional antivirus to include behaviour-based detection, memory protection, application control, and rapid response capabilities.
+
+Traditional Antivirus vs. EDR
+Traditional antivirus (AV) relied primarily on signature-based detection: comparing file hashes and byte patterns against a database of known malware. Effective against commodity threats but blind to novel malware, fileless attacks, and living-off-the-land techniques that abuse legitimate system tools.
+
+Endpoint Detection and Response (EDR) platforms collect comprehensive telemetry from endpoints — process creation and termination, network connections, file system and registry activity, memory operations, loaded DLLs, and user account events. This data is streamed to a central platform where detection algorithms (signature-based, behavioural, and ML-based) analyse patterns indicative of attack techniques.
+
+Core EDR Capabilities
+Continuous telemetry collection: Kernel-level agents capture all system activity, providing a full forensic timeline of everything that occurred on an endpoint.
+
+Behavioural detection: Rules and ML models flag suspicious behaviours regardless of the specific file or tool used. Examples: a Word document spawning PowerShell which makes network connections (common for malicious macro execution), or LSASS memory being read by a non-system process (credential dumping).
+
+Threat hunting: Security analysts query the centralised telemetry database to proactively search for adversary TTPs. Queries like "show all processes that loaded mimikatz modules across all endpoints in the past 30 days" are possible.
+
+Automated response: EDR platforms can automatically isolate compromised endpoints from the network, kill malicious processes, quarantine files, and block specific network connections — critical for rapid containment.
+
+Investigation and forensics: The full process tree, file activity, and network connections surrounding a detection enable rapid investigation without requiring manual forensic collection from the device.
+
+Common EDR Platforms
+CrowdStrike Falcon, Microsoft Defender for Endpoint, SentinelOne, Carbon Black, Cybereason. Extended Detection and Response (XDR) platforms correlate endpoint telemetry with network, email, cloud, and identity data in a unified detection platform.
+
+Fileless Malware and Memory-Only Attacks
+Sophisticated attackers use fileless techniques to evade file-based detection: injecting malicious code directly into memory of running processes (process injection), using PowerShell and WMI for execution without dropping files, or reflective DLL loading. EDR detects these through memory scanning, behaviour monitoring, and AMSI (Antimalware Scan Interface) integration that intercepts script execution.
+
+Application Control and Whitelisting
+Application whitelisting (Windows Defender Application Control, AppLocker) permits only approved executables to run, preventing unknown malware and limiting living-off-the-land abuse. Highly effective but operationally complex to maintain in environments with diverse software.
+
+Patch Management Integration
+EDR platforms increasingly integrate vulnerability data, prioritising endpoints with known vulnerabilities that are being actively targeted. Combining EDR telemetry with patch status enables risk-based patching.
+
+Managed Detection and Response (MDR)
+Organisations without 24/7 SOC capacity can outsource threat monitoring and response to MDR providers who monitor EDR telemetry and respond to incidents on behalf of the customer. MDR bridges the security skills gap for mid-market organisations.

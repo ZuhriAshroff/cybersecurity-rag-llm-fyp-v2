@@ -1,0 +1,37 @@
+Title: OWASP Top 10 Web Application Security Risks
+Source: OWASP Top 10 2021 — Standard Awareness Document for Developers
+
+The Open Web Application Security Project (OWASP) Top 10 is the most widely recognised framework for web application security risks, updated periodically based on vulnerability data from hundreds of organisations. The 2021 edition covers the following categories:
+
+A01 — Broken Access Control (moved to #1)
+Restrictions on authenticated users are not properly enforced. Attackers exploit these flaws to access unauthorised functionality or data: viewing another user's account, modifying access privileges, acting as another user. IDOR (Insecure Direct Object Reference) is a classic example — changing the URL parameter from /account?id=123 to /account?id=124 accesses another user's account.
+
+A02 — Cryptographic Failures
+Sensitive data (passwords, financial information, health records) is exposed due to weak or absent encryption. Common failures: transmitting data over HTTP, storing passwords in plaintext or with weak hashes (MD5, SHA-1 without salt), using deprecated cryptographic algorithms (DES, RC4).
+
+A03 — Injection
+Injection flaws occur when untrusted data is sent to an interpreter as part of a command or query. SQL injection, OS command injection, LDAP injection, and XML injection are examples. Parameterised queries and ORMs prevent SQL injection by separating data from code.
+
+A04 — Insecure Design
+A new category in 2021 focusing on design and architectural flaws — insufficient threat modelling during design, missing security controls that were never built, and business logic flaws. Secure design principles and threat modelling must be integrated into the SDLC.
+
+A05 — Security Misconfiguration
+The most commonly seen issue: default credentials, unnecessary features enabled, overly permissive cloud storage, verbose error messages revealing stack traces, missing security headers (CSP, HSTS, X-Frame-Options). Automated configuration scanning and hardening guides address these.
+
+A06 — Vulnerable and Outdated Components
+Using libraries, frameworks, and other software components with known vulnerabilities. SolarWinds and Log4Shell demonstrated that a single vulnerable component can compromise thousands of organisations. Software composition analysis (SCA) tools (Snyk, OWASP Dependency-Check) identify vulnerable dependencies.
+
+A07 — Identification and Authentication Failures
+Weaknesses in authentication and session management: credential stuffing, brute force without rate limiting, weak session token entropy, session fixation, insecure password reset flows. Implement MFA, secure session management, and use battle-tested authentication frameworks.
+
+A08 — Software and Data Integrity Failures
+Code and infrastructure that does not protect against integrity violations: insecure CI/CD pipelines, unsigned software updates, deserialisation of untrusted data. The 2020 SolarWinds supply chain attack injected malicious code into a signed software update.
+
+A09 — Security Logging and Monitoring Failures
+Without logging, attacks cannot be detected. Applications should log authentication events, access control failures, and input validation failures with sufficient context (timestamp, user, IP, affected resource). Logs must be protected from tampering and monitored for alerts.
+
+A10 — Server-Side Request Forgery (SSRF)
+SSRF occurs when an application fetches a remote resource based on user-supplied URL without validating against an allowlist. Attackers use SSRF to reach internal services (databases, metadata endpoints, cloud management APIs) not normally accessible from the internet. Mitigate by validating and sanitising all user-supplied URLs, using allowlists, and blocking access to internal RFC 1918 addresses and cloud metadata endpoints (169.254.169.254).
+
+Using the OWASP Top 10
+The Top 10 is a starting point, not a complete security programme. It is widely used as a compliance reference (PCI DSS, security audits) but should be supplemented with the OWASP Application Security Verification Standard (ASVS) for comprehensive testing, and the OWASP Testing Guide for hands-on assessment methodology.

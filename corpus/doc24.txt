@@ -1,0 +1,35 @@
+Title: Supply Chain Attacks — SolarWinds, Log4Shell, and Third-Party Risk
+Source: CISA Supply Chain Risk Management / NIST SP 800-161 Rev. 1
+
+A supply chain attack (also called a software supply chain attack or third-party attack) targets the less-secure elements in the software or hardware supply chain to compromise downstream customers. Instead of attacking a hardened target directly, adversaries compromise a trusted vendor, supplier, or open-source component, weaponising the trust relationship.
+
+The SolarWinds Attack (2020)
+The most consequential supply chain attack to date occurred when Russian SVR hackers (APT29/Cozy Bear) compromised the build pipeline of SolarWinds' Orion IT management platform. Malicious code (SUNBURST) was injected into legitimate Orion software updates, cryptographically signed by SolarWinds, and distributed to approximately 18,000 customers including US government agencies (Treasury, State, DHS, Pentagon), major technology companies, and critical infrastructure operators.
+
+SUNBURST used an extended dormancy period (up to two weeks after installation before activating), domain generation algorithm (DGA) communication to blend with legitimate Orion network traffic, and only proceeded to full C2 communication if the environment matched specific criteria (not in testing environments, not using certain AV products). The attack went undetected for approximately nine months.
+
+Log4Shell (CVE-2021-44228)
+Log4j is a widely used Java logging library present in hundreds of enterprise applications and cloud services. The Log4Shell vulnerability allowed an attacker to send a crafted string (e.g., in an HTTP header) that, when logged by a vulnerable application, triggered JNDI LDAP lookups fetching and executing attacker-controlled Java code — unauthenticated remote code execution with no user interaction.
+
+Because Log4j was a transitive dependency (embedded inside other libraries and applications), many organisations did not know they were exposed. Patches were released within days but the remediation effort took months across the industry. Nation-states, ransomware groups, and cryptominers all exploited Log4Shell within hours of public disclosure.
+
+Open Source Software Risk
+The average application has hundreds of open-source dependencies. The 2022 State of the Software Supply Chain report found that supply chain attacks on open source packages grew 742% in three years. Attack patterns include:
+- Typosquatting: Publishing packages with names similar to popular libraries (e.g., "requets" vs "requests").
+- Dependency confusion: Uploading internal package names to public registries to intercept private dependency resolution.
+- Account takeover: Compromising maintainer accounts to inject malicious code into legitimate packages.
+- Malicious pull requests: Contributing backdoored code to open-source projects.
+
+Hardware Supply Chain
+Hardware supply chain risks include counterfeit components, firmware implants, and hardware backdoors introduced during manufacturing or transit. The 2018 Bloomberg "Big Hack" report (disputed but not fully refuted) alleged hardware implants on Supermicro server boards.
+
+Defences
+Software Bill of Materials (SBOM): A machine-readable inventory of all software components and their versions, enabling rapid response when a new CVE affects a component. Executive Order 14028 mandated SBOM for US federal software procurement.
+
+Software composition analysis (SCA): Tools like Snyk, OWASP Dependency-Check, and GitHub Dependabot continuously monitor dependencies for known CVEs and alert on new disclosures.
+
+Code signing and build verification: Sign all build outputs; verify signatures before deployment. Reproducible builds allow independent verification that a binary matches the source code.
+
+Third-party risk management (TPRM): Assess vendor security posture through questionnaires, security ratings services (SecurityScorecard, Bitsight), and contractual security requirements.
+
+Privileged access for vendors: Grant vendors the minimum necessary access, monitored and time-limited. Segment vendor access from production environments.
