@@ -1,0 +1,43 @@
+Title: Insider Threats — Detection, Prevention, and Mitigation
+Source: CISA Defining Insider Threats / CERT Insider Threat Center — Carnegie Mellon SEI
+
+An insider threat is a security risk originating from within the targeted organisation — current or former employees, contractors, business partners, or vendors who have authorised access to networks, systems, or data. Unlike external threats, insiders already have legitimate access credentials, making detection significantly more challenging.
+
+Insider Threat Categories
+
+Malicious insiders: Intentionally cause harm — data theft for competitive intelligence or personal financial gain, sabotage of systems or data, espionage for a nation-state or competitor, or fraud.
+
+Negligent insiders: The most common category — cause security incidents through carelessness, poor security hygiene, or failure to follow policies. Examples: falling for phishing emails, misconfiguring cloud resources, using personal devices for sensitive work, or sending sensitive data to personal email.
+
+Compromised insiders: Employees whose accounts or devices have been compromised by external attackers. The insider's credentials are used but the actor is external. This blurs the insider/outsider boundary.
+
+Third-party insiders: Vendors, contractors, and managed service providers with privileged access. The 2013 Target breach began through compromised credentials of an HVAC contractor.
+
+Risk Indicators and Detection
+
+Behavioural indicators: Excessive data downloads or transfers, accessing systems or data outside normal job function, working unusual hours, circumventing security controls, expressions of grievance or intent to leave.
+
+Technical indicators: Large volume of data copied to USB or personal cloud storage, bulk email forwards to personal accounts, access to sensitive repositories not required for current role, unusual off-hours logins, database queries returning unusually high row counts.
+
+User and Entity Behaviour Analytics (UEBA): ML models establish baselines of normal user behaviour (access patterns, data volumes, working hours) and alert on significant deviations. UEBA is particularly effective at detecting data exfiltration over time by departing employees.
+
+Data Loss Prevention (DLP): DLP tools inspect content being copied, emailed, or uploaded, blocking transfer of classified or sensitive data to unauthorised destinations (personal email, USB, unapproved cloud services).
+
+Privileged Access Monitoring: PAM platforms record all privileged sessions, enabling forensic review of what privileged users did during a session.
+
+Prevention Controls
+
+Least privilege: Users have only the access needed for their current role. Reduces what a negligent or malicious insider can access.
+
+Separation of duties: Critical functions require multiple individuals — no single person can complete a high-risk transaction alone. Common in financial systems (four-eyes principle for wire transfers) and change management.
+
+Background checks: Pre-employment screening appropriate to the role's access level. Periodic re-screening for high-clearance roles.
+
+Security awareness training: Educate employees on insider threat risks, acceptable use policies, and the consequences of policy violations.
+
+Off-boarding procedures: Immediately revoke all access upon departure — accounts, VPN, email, cloud services, physical access badges. Review departing employee data transfers in the preceding 30 days.
+
+Cultural factors: A culture where employees feel valued, grievances are addressed, and ethical behaviour is rewarded reduces the risk of malicious insider activity. Most insider attackers exhibit warning signs before acting.
+
+Legal and HR Considerations
+Insider threat investigations must balance security needs with employee privacy rights and employment law. Legal counsel and HR must be involved early. Monitoring should be disclosed in acceptable use policies. Evidence collected for disciplinary action or prosecution must meet appropriate legal standards.

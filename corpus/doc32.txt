@@ -1,0 +1,34 @@
+Title: Container and Kubernetes Security
+Source: NIST SP 800-190 — Application Container Security Guide / CIS Kubernetes Benchmark
+
+Container technology (Docker, containerd, Podman) packages applications and their dependencies into portable, isolated units. Kubernetes (K8s) orchestrates containers at scale. While containers improve deployment consistency and enable microservices architecture, they introduce specific security considerations distinct from traditional VM-based environments.
+
+Container Security Fundamentals
+
+Container vs. VM isolation: VMs use hardware virtualisation to provide strong isolation between guest OS instances. Containers share the host OS kernel, providing lightweight process-level isolation via Linux namespaces (pid, net, mnt, uts, ipc) and cgroups (resource limits). A kernel vulnerability can affect all containers on the host — container breakout attacks escape the namespace isolation to access the host.
+
+Image security: Container images are the primary attack surface — vulnerabilities in base images and application dependencies are inherited by every container. Best practices:
+- Use minimal base images (distroless, Alpine) to reduce attack surface.
+- Run vulnerability scanning on images in CI/CD (Trivy, Snyk Container, Anchore) and in registries.
+- Sign images (Docker Content Trust, Sigstore/cosign) and enforce signature verification at deployment.
+- Never run containers as root — specify a non-root USER in the Dockerfile.
+- Read-only root filesystems prevent an attacker from writing to the container's filesystem.
+
+Runtime security: Even a clean image can be attacked at runtime. Seccomp (system call filtering) profiles restrict the syscalls a container can make. AppArmor/SELinux profiles enforce mandatory access control. Runtime security tools (Falco, Aqua Security, Sysdig Secure) monitor container behaviour for anomalies — unexpected network connections, file writes in unusual locations, privilege escalation attempts.
+
+Kubernetes Security
+
+RBAC: Kubernetes Role-Based Access Control governs API access. The principle of least privilege applies — service accounts should have only the permissions needed. Audit ClusterRoleBinding for overly broad permissions (cluster-admin assigned to service accounts).
+
+Network Policies: By default, all pods can communicate with all other pods. Kubernetes Network Policies restrict pod-to-pod communication, implementing micro-segmentation. Require default-deny policies with explicit allow rules.
+
+Secrets management: Kubernetes Secrets are base64-encoded by default, not encrypted. Enable encryption at rest for etcd. Use external secrets managers (HashiCorp Vault, AWS Secrets Manager) with the Secrets Store CSI Driver rather than native Kubernetes Secrets for sensitive credentials.
+
+Pod Security Standards: Kubernetes replaced the deprecated Pod Security Policy with Pod Security Standards (Privileged, Baseline, Restricted), enforced via the built-in Pod Security Admission controller. The Restricted profile prevents privileged containers, hostPath mounts, and root execution.
+
+API server hardening: The Kubernetes API server is the control plane — restrict access with network policies, require TLS client certificates or OIDC tokens, enable audit logging, and never expose the API server to the public internet.
+
+Supply chain in Kubernetes: Software Bill of Materials (SBOM) for container images, admission controllers (OPA Gatekeeper, Kyverno) to enforce security policies at deployment time, and GitOps workflows that ensure deployed manifests match approved configurations.
+
+CIS Kubernetes Benchmark
+The Center for Internet Security publishes the CIS Kubernetes Benchmark with scored recommendations covering control plane configuration, worker node security, policies, and managed Kubernetes specifics (EKS, AKS, GKE). kube-bench automates benchmark assessment against live clusters.

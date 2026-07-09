@@ -1,0 +1,39 @@
+Title: Threat Intelligence — Types, Sources, and Integration
+Source: NIST SP 800-150 — Guide to Cyber Threat Information Sharing / MITRE ATT&CK Framework
+
+Cyber threat intelligence (CTI) is evidence-based knowledge about existing or emerging threats to assets. It enables organisations to understand who is attacking them, how, and why — moving from reactive incident response to proactive defence. Intelligence is only valuable when it is timely, accurate, relevant, and actionable.
+
+Intelligence Levels
+
+Strategic intelligence: High-level analysis of threat landscape trends, geopolitical factors, and the motivations and capabilities of nation-state and criminal threat actors. Audience: executives, board, risk management. Example: "Financially motivated ransomware groups have increased attacks on the healthcare sector by 45% in 2023."
+
+Operational intelligence: Information about specific planned or ongoing campaigns, adversary TTPs, and targets. Audience: security management and SOC leadership. Example: "APT29 is conducting a spear-phishing campaign targeting energy sector executives, using lures related to [specific topic]."
+
+Tactical intelligence: Technical Indicators of Compromise (IoCs) — malicious IP addresses, domains, file hashes, URLs, YARA rules, Snort signatures. Audience: SOC analysts, security tools. Directly actionable for blocking and detection.
+
+Intelligence Types and Sources
+
+OSINT (Open Source Intelligence): Publicly available information — threat actor forums, paste sites (Pastebin), social media, code repositories, vulnerability databases (NVD, CVE), security researcher blogs, and news. Free but requires significant analyst time to collect and assess.
+
+Commercial threat intelligence: Curated, validated intelligence feeds and platforms (Recorded Future, Mandiant Advantage, CrowdStrike Falcon Intelligence). High quality but subscription costs.
+
+ISAC (Information Sharing and Analysis Centre): Sector-specific threat sharing communities (FS-ISAC for financial services, H-ISAC for healthcare, E-ISAC for energy). Members share indicators and TTPs within the sector.
+
+Government intelligence: CISA, FBI, NSA share threat advisories and IoCs through the Automated Indicator Sharing (AIS) platform (STIX/TAXII format) and Joint Cyber Defense Collaborative (JCDC).
+
+Dark web monitoring: Intelligence vendors monitor criminal forums, ransomware leak sites, and underground markets for mentions of the organisation, leaked credentials, or data being sold.
+
+Threat Intelligence Platforms (TIP)
+TIPs (MISP, ThreatConnect, Anomali, OpenCTI) aggregate and manage intelligence from multiple sources, normalise formats (STIX 2.1, TAXII 2.1), enrich with context, and distribute IoCs to consuming security tools (SIEM, firewall, EDR) automatically.
+
+STIX and TAXII
+STIX (Structured Threat Information eXpression) is a JSON-based language for describing threat intelligence: threat actors, TTPs, campaigns, malware, tools, infrastructure, and indicators. TAXII (Trusted Automated eXchange of Indicator Information) is the transport protocol for sharing STIX objects between organisations and platforms.
+
+MITRE ATT&CK Integration
+MITRE ATT&CK provides a structured taxonomy of adversary tactics and techniques based on real-world observations. Mapping intelligence to ATT&CK enables comparison of adversary behaviour, identification of detection gaps, and prioritisation of defensive controls. Security teams use ATT&CK Navigator to visualise coverage and gaps.
+
+Threat Hunting with Intelligence
+Threat intelligence drives proactive threat hunting — using IoCs and TTPs as hypotheses to search historical telemetry for unreported compromises. Example: receiving an advisory that APT28 is using a specific C2 domain format → hunting historical DNS logs for matching queries.
+
+Intelligence Sharing Challenges
+Sharing threat intelligence benefits the whole community but requires trust — organisations are reluctant to share information that reveals their security failures or sensitive data. Traffic Light Protocol (TLP) provides a framework for communicating sharing restrictions: TLP:RED (recipient only), TLP:AMBER (organisation), TLP:GREEN (community), TLP:CLEAR (public).

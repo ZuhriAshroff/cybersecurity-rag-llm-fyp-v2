@@ -1,0 +1,50 @@
+Title: IoT Security — Threats, Vulnerabilities, and Hardening
+Source: NIST SP 800-213 — IoT Device Cybersecurity Guidance / ENISA IoT Security Guidelines
+
+The Internet of Things (IoT) encompasses billions of connected devices — smart home devices, industrial sensors, medical equipment, IP cameras, building management systems, vehicles, and more. IoT devices introduce significant security risks because they are often deployed with weak defaults, infrequent updates, and limited security capabilities, while providing persistent network access.
+
+IoT Security Challenges
+
+Resource constraints: Many IoT devices lack the computing power, memory, or battery capacity to run full cryptographic stacks, security agents, or frequent update processes.
+
+Long deployment lifetimes: Industrial IoT and medical devices are expected to operate for 10-20 years, often outliving vendor support for security updates.
+
+Heterogeneity: Thousands of vendors, protocols (MQTT, CoAP, Zigbee, Z-Wave, LoRaWAN, BLE), and operating systems make uniform security policy difficult.
+
+Physical access: Unlike servers in data centres, IoT devices are often physically accessible — attackers can extract firmware, modify hardware, or reset devices.
+
+Lack of security management: Many IoT devices lack interfaces for certificate management, log collection, or security configuration.
+
+Common IoT Vulnerabilities
+Default credentials: Many IoT devices ship with well-known default usernames and passwords (admin/admin, root/root). The Mirai botnet in 2016 compromised over 600,000 IoT devices (IP cameras, DVRs, routers) by scanning for and logging into devices using 61 hardcoded default credential pairs.
+
+Unencrypted communications: IoT devices often communicate over plain HTTP, MQTT without TLS, or proprietary protocols without encryption, exposing data and credentials.
+
+Firmware vulnerabilities: Embedded web servers, custom protocols, and outdated libraries (OpenSSL, uClibc) in firmware frequently contain exploitable vulnerabilities. Binwalk and QEMU enable firmware extraction and emulation for vulnerability research.
+
+Insecure update mechanisms: Firmware updates delivered over HTTP, without signature verification, allow man-in-the-middle injection of malicious firmware.
+
+Hardcoded credentials: Credentials compiled into firmware that cannot be changed by users, creating permanent backdoors.
+
+Attack Scenarios
+Botnet recruitment: Compromised IoT devices are incorporated into botnets for DDoS attacks (as demonstrated by Mirai), cryptomining, or spam campaigns.
+
+Lateral movement: An IoT device on the corporate network — an IP camera, printer, or HVAC controller — can serve as a foothold for pivoting to more sensitive internal systems.
+
+Physical safety impact: Compromised medical devices (pacemakers, insulin pumps), industrial controllers, or vehicle systems can have life-safety consequences.
+
+Privacy violations: Compromised smart speakers, cameras, and health monitors exfiltrate sensitive personal data.
+
+Mitigation Strategies
+Network segmentation: Place all IoT devices on isolated VLANs with no lateral access to corporate networks. IoT should communicate only to necessary cloud endpoints.
+
+Credential hygiene: Change all default passwords before deployment. Use unique credentials per device; store in a secrets management system.
+
+Firmware updates: Implement secure, automated firmware update processes with cryptographic verification. Subscribe to vendor security advisories.
+
+Inventory and discovery: Maintain a complete IoT asset inventory. Use network scanning tools (Shodan API, Nmap, Claroty, Armis) to discover unauthorised IoT devices.
+
+Zero Trust for IoT: Authenticate IoT devices with certificates (X.509) rather than shared secrets; apply least-privilege network policies per device type.
+
+Regulatory Direction
+NIST SP 800-213 provides IoT cybersecurity guidance for federal agencies. The UK Product Security and Telecommunications Infrastructure Act 2022 mandates minimum security requirements for consumer IoT — no default passwords, a vulnerability disclosure policy, and minimum software support periods.

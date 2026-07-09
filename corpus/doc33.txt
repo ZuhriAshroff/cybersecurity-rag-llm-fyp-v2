@@ -1,0 +1,36 @@
+Title: DNS Security — DNSSEC, DNS over HTTPS, and Common DNS Attacks
+Source: NIST SP 800-81-2 — Secure Domain Name System Deployment Guide / CISA DNS Security
+
+The Domain Name System (DNS) is the internet's phone book, translating human-readable domain names into IP addresses. DNS was designed in the 1980s without security in mind, and its hierarchical, distributed nature makes it a persistent target for attackers. DNS attacks can redirect users to malicious sites, intercept communications, and facilitate data exfiltration.
+
+DNS Attack Types
+
+DNS Cache Poisoning (DNS Spoofing): Attackers inject forged DNS responses into a recursive resolver's cache. The classic Kaminsky Attack (2008) exploited predictable transaction IDs and source ports to inject fake responses before the legitimate reply arrived, poisoning the cache for thousands of clients. Successful poisoning redirects all clients using the resolver to attacker-controlled IP addresses without any indication to users.
+
+DNS Amplification: DNS resolvers respond to queries with answers much larger than the request. Attackers spoof the source IP of a victim and send DNS queries to open resolvers; the amplified responses (up to 28-54x the request size) flood the victim. Used in large DDoS attacks.
+
+DNS Hijacking: Compromise of DNS registrar accounts or domain owner credentials to change authoritative DNS records, redirecting traffic from legitimate domains to attacker servers. Two-factor authentication on registrar accounts is critical.
+
+DNS Tunnelling: Encode data in DNS queries and responses to exfiltrate data or establish C2 channels through firewalls that permit DNS traffic. Tools like dnscat2 and iodine implement DNS tunnelling. Detection requires anomaly analysis of DNS traffic volume, query length, and entropy.
+
+Subdomain Takeover: When a DNS record (CNAME) points to a cloud service (S3, GitHub Pages, Heroku) that is no longer actively claimed, an attacker can register the service under the target subdomain name and host malicious content under the legitimate domain.
+
+DNSSEC — DNS Security Extensions
+
+DNSSEC adds cryptographic signatures to DNS records, allowing resolvers to verify that responses are authentic and have not been tampered with. Each DNS zone signs its records with a private key; the corresponding public key is published as a DNSKEY record. A chain of trust from the root zone down enables validation.
+
+DNSSEC prevents cache poisoning — a spoofed response without a valid signature fails validation. However, DNSSEC adoption remains below 30% globally due to operational complexity (key management, key rollover, zone signing) and performance overhead.
+
+DNS over HTTPS (DoH) and DNS over TLS (DoT)
+
+Traditional DNS queries are sent in plaintext over UDP port 53, enabling eavesdropping and tampering by on-path adversaries. DoH (RFC 8484) and DoT (RFC 7858) encrypt DNS queries in TLS.
+
+DoH sends DNS queries inside HTTPS (port 443), making them indistinguishable from web traffic — this can bypass DNS monitoring tools. DoT uses a dedicated TLS connection (port 853), more visible to network administrators.
+
+Major browsers (Chrome, Firefox, Edge) and operating systems now support DoH to trusted resolvers (Cloudflare 1.1.1.1, Google 8.8.8.8), improving end-user privacy. Enterprise deployments must account for DoH bypassing corporate DNS controls and visibility.
+
+Protective DNS (PDNS)
+DNS filtering services (Cisco Umbrella, Cloudflare Gateway, Quad9) block resolution of known malicious domains, providing a lightweight and highly effective layer of protection against malware C2 communication, phishing sites, and malware distribution. CISA offers a free Protective DNS service for US federal civilian agencies.
+
+DNS Logging and Monitoring
+DNS logs are a high-value security telemetry source — nearly all malware uses DNS for C2 communication. Log all DNS queries at the resolver level, ship to SIEM, and apply threat intelligence enrichment and anomaly detection.

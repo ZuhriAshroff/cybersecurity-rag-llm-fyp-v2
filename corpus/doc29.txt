@@ -1,0 +1,40 @@
+Title: API Security — Common Vulnerabilities and Protective Controls
+Source: OWASP API Security Top 10 2023 / NIST SP 800-204 Series
+
+Application Programming Interfaces (APIs) are the connective tissue of modern applications — enabling mobile apps, web frontends, and third-party integrations to communicate with backend services. The attack surface exposed through APIs has grown dramatically as organisations adopt microservices architectures, and API-specific vulnerabilities now represent a major threat category.
+
+OWASP API Security Top 10 (2023)
+
+API1 — Broken Object Level Authorisation (BOLA): The most prevalent API vulnerability. APIs expose object identifiers (e.g., /api/orders/12345) but fail to verify that the authenticated user is authorised to access that specific object. Attackers enumerate IDs to access other users' data. BOLA is the API equivalent of IDOR in web applications.
+
+API2 — Broken Authentication: Poorly implemented authentication — weak tokens, missing token expiry, insecure token transmission, or accepting tokens in query parameters (which appear in server logs and browser history). APIs must require strong authentication for all non-public endpoints.
+
+API3 — Broken Object Property Level Authorisation: APIs return entire objects but clients should only access a subset of properties. Mass assignment vulnerabilities allow attackers to submit properties that should be server-controlled (e.g., isAdmin=true).
+
+API4 — Unrestricted Resource Consumption: Missing rate limiting allows attackers to perform brute force, DoS, or scrape data at scale. APIs should limit request rates, payload sizes, and the number of records returned per request.
+
+API5 — Broken Function Level Authorisation: Administrative functions exposed through the same API are accessible by unprivileged users. Example: DELETE /api/admin/users accessible without admin role verification.
+
+API6 — Unrestricted Access to Sensitive Business Flows: Business logic abuse — making too many purchases, excessive coupon redemptions, or bypassing booking rate limits. Requires application-specific controls on sensitive operations.
+
+API7 — Server-Side Request Forgery (SSRF): APIs that fetch remote URLs based on user input can be manipulated to reach internal services. See OWASP Top 10 A10.
+
+API8 — Security Misconfiguration: Default configurations, unnecessary HTTP methods enabled, verbose error responses disclosing stack traces, missing security headers, and CORS misconfiguration allowing any origin.
+
+API9 — Improper Inventory Management: Shadow APIs — undocumented, deprecated, or test API versions still accessible in production but not maintained or monitored. API gateways and API discovery tools address this.
+
+API10 — Unsafe Consumption of APIs: Applications that blindly trust data received from third-party APIs, failing to validate or sanitise it before use.
+
+Security Controls
+
+Authentication: Use OAuth 2.0 with JWT (JSON Web Tokens) or API keys. Validate JWT signatures and claims (expiry, issuer, audience). Never accept tokens in query parameters.
+
+Authorisation: Enforce object-level authorisation on every API endpoint — the framework typically cannot do this automatically. Test with horizontal and vertical privilege escalation scenarios.
+
+Rate limiting and throttling: Apply per-user and per-IP rate limits at the API gateway layer. Use exponential backoff and temporary IP blocking for brute force patterns.
+
+Input validation: Validate all inputs against a schema. Reject unexpected fields (strict parsing). Use parameterised queries for any database interaction.
+
+API gateway: Centralise authentication, rate limiting, logging, TLS termination, and threat detection at a dedicated API gateway (Kong, AWS API Gateway, Apigee). Reduces per-service security implementation burden.
+
+Security testing: Include API security testing in CI/CD pipelines. Use tools like OWASP ZAP, Burp Suite, or dedicated API testing platforms (42Crunch, Salt Security) to test for OWASP API Top 10 vulnerabilities automatically.

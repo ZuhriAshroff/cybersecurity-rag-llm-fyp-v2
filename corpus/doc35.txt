@@ -1,0 +1,43 @@
+Title: Data Loss Prevention (DLP) and Data Protection
+Source: NIST SP 800-53 Rev. 5 — SC-7, AC-4 / Gartner DLP Market Guide
+
+Data Loss Prevention (DLP) refers to the strategies, processes, and technologies that prevent sensitive data from leaving organisational control — whether through malicious exfiltration, negligent sharing, or accidental exposure. DLP is a critical control for protecting intellectual property, personal data (required by GDPR, HIPAA, PCI DSS), and national security information.
+
+Data Classification
+Effective DLP begins with knowing what data exists and its sensitivity level. Data classification frameworks typically define tiers:
+
+Public: No restriction on distribution.
+Internal: For internal use; not intended for external distribution.
+Confidential: Sensitive business data — financial results, M&A plans, HR records, customer lists.
+Restricted/Secret: Regulated data (PII, PHI, PCI cardholder data), trade secrets, or national security information — strict access controls and handling requirements.
+
+Classification can be performed manually (user-applied labels in Microsoft Purview Information Protection, Adobe Acrobat), automatically (ML-based content inspection identifying patterns matching PII, financial data), or based on storage location and data lineage.
+
+DLP Architecture
+
+Network DLP: Inspects outbound network traffic — email, web uploads, FTP, cloud storage — for sensitive content patterns. Deployed inline as a proxy or via API integration with cloud services. Blocks or quarantines transfers violating policy. Encrypted traffic requires TLS inspection for full visibility.
+
+Endpoint DLP: Agent on endpoints monitors and controls file operations — copying to USB, printing, uploading, screenshotting, pasting. Works for encrypted traffic that network DLP cannot inspect. Essential for preventing insider exfiltration to removable media.
+
+Cloud DLP: Cloud Access Security Broker (CASB) provides visibility and control over data in sanctioned and unsanctioned cloud services. Scans data at rest in cloud storage (S3, SharePoint, Google Drive) for sensitive content, applies classification labels, and enforces access policies.
+
+Email DLP: Inspects outbound email body and attachments for sensitive content. Can quarantine for review, encrypt, apply rights management, or block and notify.
+
+DLP Detection Techniques
+Keyword matching: Detect specific terms or phrases (confidential, top secret, salary, M&A).
+Regular expressions: Match structured data patterns — credit card numbers (Luhn algorithm), Social Security Numbers, UK NHS numbers, IBAN.
+Document fingerprinting: Hash specific documents and detect fragments in outbound traffic.
+Machine learning: Classify documents by content without relying on specific patterns.
+
+Common DLP Use Cases
+- Preventing employees from emailing customer PII to personal accounts.
+- Blocking upload of source code to personal cloud storage or public GitHub repos.
+- Alerting on bulk download of customer databases before employee departure.
+- Preventing credit card numbers from being sent in plaintext over email.
+- Detecting GDPR-regulated personal data in improperly accessible storage.
+
+DLP Limitations
+DLP has known bypass techniques — encoding data in images (steganography), renaming files, or using encrypted tunnels. DLP is a detective and preventive control, not a guarantee. Effectiveness depends on data classification accuracy, policy completeness, and integration with incident response workflows. Overly broad policies generate excessive false positives that analysts learn to ignore.
+
+Rights Management
+Information Rights Management (IRM/DRM) provides persistent protection — encryption and access controls that travel with the document. Microsoft Purview Information Protection and Adobe Experience Manager support IRM, enabling documents to remain protected even when shared externally, with controls on printing, forwarding, and expiry.

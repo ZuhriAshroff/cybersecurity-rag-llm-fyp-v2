@@ -1,0 +1,46 @@
+Title: Secure Software Development Lifecycle (SSDLC)
+Source: NIST SP 800-218 — Secure Software Development Framework (SSDF) / Microsoft SDL
+
+The Secure Software Development Lifecycle (SSDLC) integrates security activities throughout every phase of software development — from requirements and design through implementation, testing, deployment, and maintenance. Security defects are 30x cheaper to fix during design than in production. The SSDLC shifts security left, embedding it in the development process rather than bolt-ing it on at the end.
+
+SSDLC Phases
+
+Requirements and Design
+Security requirements must be defined alongside functional requirements: authentication mechanisms, authorisation model, encryption requirements, audit logging, data retention and deletion, and regulatory compliance (GDPR, HIPAA, PCI DSS). Threat modelling — systematically identifying threats to the application — is conducted at design time.
+
+Threat Modelling (STRIDE)
+Microsoft's STRIDE methodology categorises threats:
+- Spoofing identity
+- Tampering with data
+- Repudiation (denying actions)
+- Information disclosure
+- Denial of service
+- Elevation of privilege
+
+For each component and data flow in the architecture, analysts identify applicable threats and design mitigations. OWASP's Threat Dragon and Microsoft's Threat Modeling Tool support this process. MITRE ATT&CK for Enterprise can inform threat modelling with real-world adversary techniques.
+
+Implementation
+Secure coding standards and guidelines are enforced through IDE plugins (SonarLint), pre-commit hooks, and code review checklists. Key practices:
+
+Input validation and output encoding: All external inputs (user data, API responses, file contents) are validated against expected format/type/range. Outputs are encoded for their destination context (HTML encoding, SQL parameterisation, shell escaping).
+
+Dependency management: Use current, maintained libraries. Software composition analysis (SCA) tools identify vulnerable dependencies in the build.
+
+Secrets management: No hardcoded credentials, API keys, or certificates in source code. Use secrets management systems (HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) and scan for accidental secret commits (git-secrets, TruffleHog, GitLeaks).
+
+Testing
+Static Application Security Testing (SAST): Analyse source code without execution to find injection flaws, insecure API use, and other vulnerabilities. Tools: Checkmarx, Semgrep, Veracode, CodeQL.
+
+Dynamic Application Security Testing (DAST): Test the running application by sending attack inputs (fuzzing, injection payloads). Tools: OWASP ZAP, Burp Suite, Invicti.
+
+Interactive Application Security Testing (IAST): Instrument the running application to observe code execution paths during functional testing, combining SAST depth with DAST's runtime view.
+
+Fuzz Testing: Send malformed, random, or boundary inputs to discover crashes and unexpected behaviour. Coverage-guided fuzzers (AFL++, libFuzzer, OSS-Fuzz) are standard for security-critical C/C++ code.
+
+Penetration Testing: Manual expert testing before major releases to find logic flaws and attack chains that automated tools miss.
+
+Deployment and Operations
+Secure configuration baselines, infrastructure-as-code security scanning (Checkov, tfsec), and runtime protection (WAF, RASP) extend security into deployment. Security patches must be applied promptly; the SDLC must include a clear patch release process.
+
+Metrics
+Lines of code per vulnerability found, vulnerability density by SAST category, mean time to remediate security bugs, percentage of critical components with threat model coverage, and percentage of builds passing security gates track SSDLC maturity.

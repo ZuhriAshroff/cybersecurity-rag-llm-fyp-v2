@@ -1,0 +1,38 @@
+Title: Email Security — Phishing, Spoofing, and Authentication Protocols
+Source: NIST SP 800-177 Rev. 1 — Trustworthy Email / CISA Email Security Best Practices
+
+Email remains the primary vector for cyberattacks — the 2022 Verizon DBIR attributed 36% of data breaches to phishing. Email security encompasses both authentication protocols to prevent spoofing and filtering technologies to detect and block malicious messages.
+
+Email Spoofing and Phishing
+Email spoofing exploits the lack of authentication in the original SMTP protocol (RFC 821, 1982) — anyone can set an arbitrary From address. Phishing uses spoofed or lookalike domains to deceive recipients into revealing credentials, clicking malicious links, or opening weaponised attachments. Spear phishing targets specific individuals using personalised context gathered from OSINT.
+
+Business Email Compromise (BEC): Attackers impersonate executives or financial officers to authorise fraudulent wire transfers. BEC caused $2.7B in losses in 2022 (FBI IC3). Unlike malware-based attacks, BEC often involves no malicious attachments — only social engineering.
+
+Email Authentication Standards
+
+SPF (Sender Policy Framework): A DNS TXT record listing IP addresses authorised to send email on behalf of a domain. Receiving servers check that the sending IP is in the SPF record. SPF alone does not protect the From header visible to users — it validates the envelope sender (MAIL FROM).
+
+DKIM (DomainKeys Identified Mail): The sending server cryptographically signs outgoing messages using a private key. The corresponding public key is published in DNS. Receiving servers verify the signature, confirming the message was not altered in transit and originated from the signing domain. DKIM survives forwarding better than SPF.
+
+DMARC (Domain-based Message Authentication, Reporting, and Conformance): Ties SPF and DKIM to the From header visible to users, and instructs receiving servers what to do with failing messages (p=none — report only; p=quarantine — send to spam; p=reject — discard). DMARC reports (XML) are sent to the address in the DMARC record, providing visibility into spoofing attempts and authentication failures. DMARC with p=reject is the most effective anti-spoofing control.
+
+BIMI (Brand Indicators for Message Identification): Allows organisations with DMARC enforcement to display their logo in supported email clients, increasing user trust in authenticated email.
+
+Email Gateway Security
+Secure Email Gateways (SEG) — Proofpoint, Mimecast, Microsoft Defender for Office 365 — apply multiple inspection layers:
+
+Anti-spam: Reputation-based and content-based spam filtering using IP reputation, domain reputation, Bayesian analysis, and sender behaviour analysis.
+
+Anti-malware: Attachment scanning with antivirus engines, sandbox detonation of suspicious attachments, and URL rewriting with time-of-click scanning to catch malicious links that activate after initial delivery.
+
+Content filtering: DLP policies to prevent outbound email containing sensitive data (credit card numbers, SSNs, confidential keywords).
+
+Phishing detection: Machine learning models detect phishing indicators — display name spoofing, lookalike domain, urgency language, unusual link destinations.
+
+Advanced Email Threats
+QR code phishing (quishing): Malicious QR codes in email attachments bypass URL scanners that only analyse text content.
+HTML smuggling: Malicious content assembled client-side from encoded HTML/JavaScript, bypassing attachment scanners.
+Adversary-in-the-middle phishing (AiTM): Reverse proxy phishing kits capture MFA tokens in real time by sitting between the victim and the legitimate login page.
+
+User Security Awareness
+Technical controls reduce but do not eliminate phishing risk. Regular phishing simulation training, clear procedures for reporting suspicious emails, and executive security awareness programmes are essential complements to technical defences.

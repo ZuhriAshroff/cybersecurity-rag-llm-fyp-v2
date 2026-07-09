@@ -1,0 +1,37 @@
+Title: Wireless Security — WPA3, 802.11 Attacks, and Wi-Fi Hardening
+Source: NIST SP 800-153 — Guidelines for Securing Wireless Local Area Networks / SANS Wireless Security
+
+Wireless networks introduce unique security challenges because radio signals propagate beyond physical boundaries — anyone within range can attempt to intercept or interact with the network. Wi-Fi security has evolved through several generations in response to discovered vulnerabilities.
+
+Wireless Security Standards Evolution
+
+WEP (Wired Equivalent Privacy, 1999): The first Wi-Fi security standard, using RC4 stream cipher with 40 or 104-bit keys. Fatally broken by 2001 — practical attacks recover the key from captured packets in minutes. WEP must never be used.
+
+WPA (Wi-Fi Protected Access, 2003): Emergency replacement for WEP using TKIP (Temporal Key Integrity Protocol). TKIP used RC4 but with per-packet key mixing and sequence counters to address WEP's weaknesses. Deprecated and vulnerable; avoid.
+
+WPA2 (2004): Introduced CCMP (Counter Mode CBC-MAC Protocol) based on AES-128, providing strong confidentiality and integrity. Two modes: Personal (WPA2-PSK — pre-shared key, suitable for home/small business) and Enterprise (WPA2-Enterprise, using 802.1X authentication with EAP and a RADIUS server).
+
+WPA3 (2018): Addresses WPA2-PSK's vulnerability to offline dictionary attacks through Simultaneous Authentication of Equals (SAE — the Dragonfly handshake), which provides forward secrecy even if the password is later compromised. WPA3-Enterprise mandates 192-bit minimum security.
+
+Common 802.11 Attacks
+
+PMKID Attack: Against WPA2-PSK, a single packet from the AP contains the PMKID, from which the pre-shared key can be derived through offline dictionary attack without capturing a full 4-way handshake. Tools: hcxtools, hashcat.
+
+Deauthentication Attack: The 802.11 standard originally lacked authentication for management frames, allowing anyone to send forged deauthentication frames that disconnect clients. Used to force reconnection and capture the WPA2 4-way handshake. Management Frame Protection (MFP/802.11w) addresses this and is mandatory in WPA3.
+
+Evil Twin / Rogue AP: A fake AP with the same SSID as a legitimate network attracts clients (especially when signal is stronger). Clients attempting to authenticate reveal credentials or are subject to MitM attacks.
+
+KRACK (Key Reinstallation Attack): A 2017 attack against the WPA2 4-way handshake exploiting nonce reuse in key reinstallation, allowing an attacker to replay, decrypt, and potentially forge packets. Patched by vendor updates.
+
+Enterprise Wi-Fi Security
+WPA2/WPA3-Enterprise with 802.1X eliminates the shared password problem by authenticating each device/user individually against a RADIUS server. EAP protocols: EAP-TLS (certificate-based, strongest), EAP-PEAP (password-based but encrypted in a TLS tunnel), EAP-TTLS.
+
+Corporate Wi-Fi hardening practices:
+- Deploy WPA3-Enterprise for new deployments; WPA2-Enterprise with strong EAP where WPA3 is unsupported.
+- Segment wireless networks: corporate SSID → corporate LAN, guest SSID → isolated internet-only zone, IoT SSID → dedicated IoT VLAN.
+- Deploy WIDS to detect rogue APs, deauthentication floods, and unusual client behaviour.
+- Disable SSID broadcast has minimal security benefit and complicates management — rely on encryption instead.
+- Use certificate pinning in supplicant configuration to prevent evil twin credential harvesting on enterprise networks.
+
+Home Network Security
+Change default SSID and credentials on the wireless router. Use WPA3 or WPA2-AES (not WPA-TKIP or mixed mode). Disable WPS (Wi-Fi Protected Setup) which has known brute-force vulnerabilities. Enable the firewall. Keep firmware updated. Place IoT devices on a separate SSID/VLAN.
