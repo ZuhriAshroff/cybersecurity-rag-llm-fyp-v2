@@ -1,0 +1,35 @@
+Title: Active Directory Security — Attacks and Hardening
+Source: Microsoft Active Directory Security Best Practices / BloodHound Enterprise Attack Paths / ANSSI Active Directory Security
+
+Active Directory (AD) is Microsoft's directory service used to manage users, computers, and policies across Windows enterprise networks. AD is present in the vast majority of enterprise environments and is the primary target for attackers seeking to escalate privileges and establish persistent, widespread access. Domain administrator access in Active Directory equates to complete control over the organisation's Windows infrastructure.
+
+Key AD Attack Techniques
+
+Pass-the-Hash (PtH): NTLM authentication in Windows uses a hash of the user's password rather than the plaintext. An attacker who extracts the NTLM hash from one system (using Mimikatz against LSASS memory) can use it directly to authenticate to other systems without knowing the actual password.
+
+Pass-the-Ticket (PtT): Kerberos tickets (TGT or service tickets) are extracted from memory and used to impersonate the original user on other systems. Silver tickets are forged service tickets using the service account's hash; golden tickets are forged TGTs using the KRBTGT hash, providing unlimited domain access.
+
+Kerberoasting: Any domain user can request a Kerberos service ticket for any service account. The ticket is encrypted with the service account's password hash and can be extracted and brute-forced offline to recover the service account password. Service accounts with weak passwords are prime targets.
+
+AS-REP Roasting: Accounts with "Do not require Kerberos preauthentication" set allow an attacker to request an AS-REP (authentication service response) encrypted with the account's password hash, enabling offline cracking without prior credentials.
+
+DCSync: An account with Domain Controller replication rights can request replication of all domain credentials — effectively dumping the entire AD database (including KRBTGT and all user hashes) without local access to the DC.
+
+BloodHound Attack Path Analysis: BloodHound uses graph theory to identify attack paths from low-privilege accounts to Domain Admin through chains of permissions, group memberships, and trust relationships that would be invisible in traditional reviews.
+
+AD Hardening Measures
+
+Tiered administration model (Microsoft's AD Tier Model): Separate administrative accounts for Tier 0 (domain controllers, PKI), Tier 1 (servers), and Tier 2 (endpoints). Tier 0 admins never log into Tier 1/2 systems; compromising a Tier 2 machine cannot directly compromise Tier 0.
+
+Protected Users security group: Placing privileged accounts in Protected Users prevents NTLM authentication, prevents credential caching, and enforces Kerberos with AES encryption only — significantly reducing credential theft risk.
+
+Credential Guard: Windows Defender Credential Guard uses virtualisation-based security (VBS) to isolate LSASS in a protected hypervisor-managed process, preventing Mimikatz from reading credentials from standard LSASS memory.
+
+LAPS (Local Administrator Password Solution): Randomises and rotates the local administrator password on each domain-joined machine, preventing lateral movement via shared local admin credentials.
+
+Privileged Access Workstations (PAW): Dedicated, hardened workstations used exclusively for administrative tasks, never for general web browsing or email — reducing the risk of credential theft through phishing or malware.
+
+Audit and monitoring: Enable advanced audit policies — Account Logon events (4624, 4625), object access, privilege use, and process creation (4688). Monitor for Kerberoasting indicators (high-volume service ticket requests), DCSync (replication traffic from non-DC sources), and LSASS access attempts.
+
+Microsoft Defender for Identity
+MDI (formerly ATP) provides identity-based threat detection in Active Directory environments — detecting PtH, PtT, Kerberoasting, golden ticket, and lateral movement in real time by analysing domain controller authentication traffic.

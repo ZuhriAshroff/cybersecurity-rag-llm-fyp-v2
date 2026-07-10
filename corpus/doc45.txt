@@ -1,0 +1,43 @@
+Title: Cryptographic Hash Functions and Password Hashing
+Source: NIST FIPS 180-4 — Secure Hash Standard / NIST SP 800-107 Rev. 1 / OWASP Password Storage Cheat Sheet
+
+Cryptographic hash functions are fundamental building blocks of modern security systems. They produce a fixed-size digest (hash) from arbitrary-length input data, with properties that make them suitable for integrity verification, digital signatures, and password storage.
+
+Properties of Cryptographic Hash Functions
+
+Pre-image resistance: Given hash output H, it is computationally infeasible to find any input M such that hash(M) = H. Prevents reversing the hash to recover the original data.
+
+Second pre-image resistance: Given input M1 and its hash, it is infeasible to find a different input M2 with the same hash. Prevents replacing a known file with a malicious one having the same hash.
+
+Collision resistance: It is infeasible to find any two different inputs M1 and M2 that produce the same hash. A collision breaks integrity verification — an attacker could substitute a malicious document that passes hash verification.
+
+Avalanche effect: A small change in input (flipping a single bit) produces a completely different output — approximately 50% of bits change.
+
+Hash Function Security
+MD5 (128-bit): Designed by Ron Rivest in 1991. Practical collision attacks demonstrated in 1996; fully broken for security purposes by 2004. MD5 is still used for non-security purposes (file checksums, deduplication) but must not be used for digital signatures or certificate fingerprints.
+
+SHA-1 (160-bit): Deprecated by NIST in 2011. Google and CWI demonstrated a practical SHA-1 collision in 2017 (SHAttered attack). Browsers no longer accept SHA-1 TLS certificates. Do not use for new applications.
+
+SHA-2 family (SHA-224, SHA-256, SHA-384, SHA-512): Current standard. SHA-256 and SHA-384 are the most widely deployed. Used in TLS 1.3, code signing, DNSSEC, and most modern cryptographic applications. No practical attacks known.
+
+SHA-3 (Keccak, 2012): NIST selected SHA-3 as an alternative to SHA-2 using a different construction (sponge construction vs. Merkle-Damgård). Provides diversity in the hash function portfolio — if a flaw were found in SHA-2's construction, SHA-3 would be unaffected.
+
+BLAKE3: Modern high-performance hash function, faster than SHA-256 on most platforms, used in some file integrity and content-addressed storage applications.
+
+Password Hashing — A Distinct Use Case
+Generic cryptographic hash functions (MD5, SHA-256) are not suitable for password storage. Because they are designed to be fast, attackers can compute billions of hashes per second on GPU hardware — enabling rapid brute-force and dictionary attacks against leaked password databases.
+
+Password hashing requires slow, memory-intensive algorithms specifically designed to resist GPU acceleration:
+
+bcrypt: Designed in 1999 with an adjustable work factor. Widely deployed, well-studied. Limited to 72-character passwords in most implementations.
+
+scrypt: Memory-hard in addition to computationally intensive, making parallelism on GPUs/ASICs more costly. Used in some cryptocurrency applications.
+
+Argon2 (NIST/Password Hashing Competition winner, 2015): The modern standard. Three variants: Argon2d (resistant to GPU attacks), Argon2i (resistant to side-channel attacks), Argon2id (recommended — hybrid). Configurable time cost, memory cost, and parallelism. Recommended by OWASP for new applications.
+
+PBKDF2: NIST-approved, uses HMAC iteratively. Required by FIPS 140 environments where Argon2 may not yet be approved. Weaker against GPU attacks than bcrypt/scrypt/Argon2.
+
+Salting: A unique random value (salt) added to each password before hashing prevents precomputed rainbow table attacks and ensures identical passwords produce different hashes. Proper password hashing libraries (bcrypt, Argon2) handle salting automatically.
+
+Key Stretching
+Increasing the work factor (iteration count, memory parameter) over time as hardware improves maintains defence against brute force even as computing power grows. Work factors should be tuned so that password verification takes approximately 300ms-1 second on server hardware.

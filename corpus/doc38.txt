@@ -1,0 +1,55 @@
+Title: Security Operations Centre (SOC) — Functions, Tiers, and Metrics
+Source: SANS SOC Survey / NIST Cybersecurity Framework / MITRE 11 Strategies of a World-Class SOC
+
+A Security Operations Centre (SOC) is a centralised function within an organisation responsible for monitoring, detecting, analysing, and responding to cybersecurity threats around the clock. The SOC is the operational hub of an organisation's security programme, translating threat intelligence, security tools, and skilled analysts into continuous protection.
+
+SOC Functions
+
+Continuous monitoring: 24/7 monitoring of security alerts from SIEM, EDR, IDS/IPS, firewalls, cloud security tools, and email security gateways. The SOC is the first to know when an alert fires and the last line of detection before an incident escalates.
+
+Alert triage and investigation: Analysts classify alerts by severity, investigate for true positive vs. false positive determination, and escalate confirmed incidents. Effective triage requires both technical knowledge and contextual awareness of the organisation's environment.
+
+Incident response: The SOC owns or coordinates response to security incidents — containment, forensic investigation, eradication, and recovery.
+
+Threat hunting: Proactive search for undetected threats using hypothesis-driven analysis of historical telemetry. Complements reactive alert monitoring.
+
+Vulnerability management support: Correlating vulnerability data with active threat intelligence to prioritise remediation.
+
+Threat intelligence consumption: Integrating intelligence feeds and advisories into detection rules and hunting hypotheses.
+
+Security tool management: Maintaining SIEM rules, EDR policies, and playbooks; tuning to reduce false positives.
+
+SOC Tiered Model
+
+Tier 1 — Alert Analyst: Front-line triage. Reviews SIEM alerts, conducts initial investigation, escalates to Tier 2. Highest volume role; requires speed and breadth.
+
+Tier 2 — Incident Responder: Deeper investigation of escalated incidents. Conducts forensic analysis, coordinates response, and manages incident lifecycle.
+
+Tier 3 — Threat Hunter / Advanced Analyst: Proactive threat hunting, malware analysis, adversary TTP research, and tool/rule development. Most senior technical role.
+
+SOC Manager: Coordinates SOC operations, manages staffing, tracks metrics, reports to CISO, and drives continuous improvement.
+
+SOC Models
+
+In-house SOC: Full-time security staff dedicated to the organisation. Maximum control and context but expensive — 24/7 coverage requires 5-6 analysts per coverage position.
+
+Managed SOC / MDR: Third-party provider monitors and responds on behalf of the organisation. Provides 24/7 coverage at lower cost than building an in-house SOC. Loss of internal context and investigative control.
+
+Co-managed (Hybrid): Organisation maintains a small internal team with strategic ownership; MDR provides overflow coverage, after-hours, and additional expertise.
+
+Key SOC Metrics
+
+Mean Time to Detect (MTTD): Time from compromise to detection. Reducing MTTD is the primary SOC performance goal.
+
+Mean Time to Respond (MTTR): Time from detection to containment/remediation.
+
+Alert volume and analyst workload: Too many alerts causes fatigue and missed detections. Target: analysts can investigate each alert.
+
+False positive rate: High rates waste analyst time; low rates risk missing real threats.
+
+Detection coverage: Percentage of MITRE ATT&CK techniques covered by active detection rules.
+
+Dwell time: Average time attackers have been in the environment before detection — industry benchmark is approximately 16 days (FireEye M-Trends 2023).
+
+SOC Automation and SOAR
+Security Orchestration, Automation, and Response (SOAR) reduces analyst toil by automating repetitive tasks: IP reputation lookups, user account lookups, endpoint quarantine, ticket creation. Automation enables Tier 1 analysts to handle higher alert volumes and reduces MTTR for common incident types.

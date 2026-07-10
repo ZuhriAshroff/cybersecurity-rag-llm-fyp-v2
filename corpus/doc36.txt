@@ -1,0 +1,41 @@
+Title: Public Key Infrastructure (PKI) and Digital Certificates
+Source: NIST SP 800-57 Part 1 Rev. 5 — Recommendation for Key Management / RFC 5280
+
+Public Key Infrastructure (PKI) is the framework of policies, procedures, hardware, software, and standards that enables the creation, management, distribution, use, storage, and revocation of digital certificates. PKI underpins HTTPS, email signing (S/MIME), code signing, and VPN authentication.
+
+Asymmetric Cryptography Foundations
+PKI is built on asymmetric (public-key) cryptography. Each entity has a key pair: a public key (freely distributed) and a private key (kept secret). Data encrypted with the public key can only be decrypted with the corresponding private key (confidentiality). Data signed with the private key can be verified by anyone holding the public key (authentication and integrity).
+
+RSA (Rivest-Shamir-Adleman): Based on the difficulty of factoring large integers. RSA-2048 and RSA-4096 are current standards. Slower than elliptic curve alternatives.
+
+Elliptic Curve Cryptography (ECC): Based on the discrete logarithm problem on elliptic curves. Provides equivalent security to RSA with much smaller key sizes — ECDSA P-256 (256-bit) provides security comparable to RSA-3072. Faster for key generation and signing. Standard in TLS 1.3.
+
+Digital Certificates
+An X.509 digital certificate binds a public key to an identity (individual, organisation, device, or domain). The certificate contains:
+- Subject: The entity the certificate identifies.
+- Subject Alternative Names (SANs): Additional identities (domain names, IP addresses, email addresses).
+- Public key: The subject's public key.
+- Validity period: Not before / Not after dates.
+- Issuer: The Certificate Authority (CA) that signed the certificate.
+- Signature: CA's digital signature over the certificate contents.
+- Extensions: Key usage, extended key usage, OCSP responder URL, CRL distribution points.
+
+Certificate Authorities and Trust
+CAs are the trust anchors of PKI. Root CAs have self-signed certificates embedded in operating systems and browsers — the trust store. Root CAs typically issue certificates to intermediate (subordinate) CAs, which issue end-entity certificates. This creates a certificate chain that the relying party verifies.
+
+Public CAs (DigiCert, Sectigo, Let's Encrypt, GlobalSign) issue trusted TLS certificates. Let's Encrypt has democratised TLS by providing free automated certificates through the ACME protocol, eliminating the cost and friction that historically led to self-signed certificates on small sites.
+
+Certificate Revocation
+Certificates may need to be revoked before expiry — if the private key is compromised, the organisation ceases to exist, or the certificate was misisssued.
+
+CRL (Certificate Revocation List): A CA-signed list of revoked serial numbers. Downloaded periodically — latency between revocation and client awareness.
+
+OCSP (Online Certificate Status Protocol): Real-time query to the CA's OCSP responder for a specific certificate's status. Better timeliness than CRL but introduces privacy and availability concerns.
+
+OCSP Stapling: The server periodically fetches a signed OCSP response from the CA and includes (staples) it in the TLS handshake. Eliminates the client's need to contact the CA — improves performance and privacy.
+
+Private PKI
+Organisations operate internal CAs for certificates issued to internal systems, users, and devices — using Microsoft Active Directory Certificate Services (AD CS), HashiCorp Vault's PKI secrets engine, or EJBCA. Internal certificates are trusted on managed devices through group policy distribution of the enterprise root CA certificate.
+
+AD CS Attacks
+Microsoft Active Directory Certificate Services is a common target in Active Directory environments. Misconfigured certificate templates can allow privilege escalation (ESC1-ESC8 vulnerabilities documented by SpecterOps in the "Certified Pre-Owned" research). Attackers can request certificates for domain admin accounts, enabling persistent privileged access through certificate-based authentication that survives password resets.

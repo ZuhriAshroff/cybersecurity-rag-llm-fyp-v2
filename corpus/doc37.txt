@@ -1,0 +1,44 @@
+Title: Network Segmentation and Zero Trust Architecture
+Source: NIST SP 800-207 — Zero Trust Architecture / CISA Zero Trust Maturity Model
+
+Network segmentation divides a network into smaller, isolated segments with controlled inter-segment communication. It contains breaches — an attacker who compromises one segment cannot freely move to others — and aligns access with the least-privilege principle. Zero Trust extends segmentation philosophy to all resources, regardless of network location.
+
+Traditional Perimeter Security
+Classic security architecture assumed that everything inside the corporate network was trusted and everything outside was untrusted. A hard perimeter (firewall, VPN) was the primary control. This model has collapsed: remote work, cloud services, BYOD, and insider threats mean the perimeter is no longer a reliable security boundary. When attackers breach the perimeter — as they routinely do — they find a flat, trusted network easy to traverse.
+
+Network Segmentation Principles
+
+Physical segmentation: Separate physical networks. Highest isolation but expensive and inflexible.
+
+VLAN segmentation: IEEE 802.1Q VLANs divide Layer 2 domains logically. Traffic between VLANs requires routing through a firewall, enabling policy enforcement. Common segmentation zones: user endpoints, servers, DMZ (internet-facing services), management, PCI/cardholder data environment, IoT, guest.
+
+Firewall zones and ACLs: Inter-zone traffic is explicitly permitted by firewall rules (allowlist/whitelist). Default-deny between zones. Rule sets should be reviewed and pruned periodically.
+
+Micro-segmentation: Granular segmentation at the workload level — individual applications, containers, or VMs. Enforced by software-defined networking (SDN) or host-based firewalls. East-west traffic (server-to-server) is controlled, not just north-south (internet-to-server).
+
+Zero Trust Architecture (ZTA)
+NIST SP 800-207 defines Zero Trust as a set of principles: assume breach, verify explicitly, and use least privilege. In a Zero Trust architecture:
+
+Every access request is fully authenticated and authorised before being granted — regardless of whether the request originates from the corporate network or the public internet.
+
+The identity of the user, the health of their device, and the sensitivity of the requested resource are evaluated on each access attempt.
+
+Lateral movement is prevented through micro-segmentation and strict east-west traffic controls.
+
+All traffic is encrypted — no implicit trust of internal network traffic.
+
+Zero Trust Core Pillars (CISA Model)
+Identity: Strong authentication (MFA, passwordless), continuous identity verification, privileged access management.
+Device: Device health and compliance posture checked before granting access (MDM/EDR integration).
+Network: Micro-segmentation, encrypted traffic, software-defined perimeter.
+Application: Application-level access controls, WAF, API security.
+Data: Classification, DLP, encryption at rest and in transit.
+
+SASE (Secure Access Service Edge)
+SASE converges WAN networking (SD-WAN) with cloud-delivered security services (SWG, CASB, ZTNA, FWaaS) in a single cloud platform. Users connect to the nearest SASE PoP rather than backhauling through a corporate data centre — improving performance for cloud-first organisations while applying consistent security policy globally.
+
+ZTNA (Zero Trust Network Access)
+ZTNA (software-defined perimeter, SDP) replaces VPN for remote access. Users are authenticated and authorised before being granted access to a specific application — they never get broad network access. Compared to VPN, ZTNA prevents lateral movement from remote access and provides application-level visibility.
+
+Segmentation Testing
+Network segmentation must be tested, not assumed. Internal penetration testing, firewall rule reviews, and network scanning verify that intended isolation exists and that rule sets match policy intent.

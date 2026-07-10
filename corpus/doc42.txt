@@ -1,0 +1,45 @@
+Title: Cross-Site Request Forgery (CSRF) and Clickjacking
+Source: OWASP CSRF Prevention Cheat Sheet / OWASP Clickjacking Defence Cheat Sheet
+
+Cross-Site Request Forgery (CSRF) is an attack that tricks an authenticated user's browser into making an unwanted request to a web application they are currently authenticated to. The attacker exploits the browser's automatic inclusion of session cookies in cross-site requests to perform actions on the victim's behalf without their knowledge.
+
+How CSRF Works
+Modern browsers automatically include cookies (including session cookies) when making requests to a domain, regardless of the origin initiating the request. If a victim is authenticated to bank.com and visits attacker.com, a malicious image tag on attacker.com can trigger:
+
+<img src="https://bank.com/transfer?to=attacker&amount=10000">
+
+The browser sends this GET request with the victim's session cookie. If bank.com processes fund transfers via GET requests (a REST design flaw), the transfer executes without user awareness.
+
+More commonly, form-based CSRF targets state-changing POST operations:
+
+<form action="https://bank.com/transfer" method="POST">
+  <input name="to" value="attacker">
+  <input name="amount" value="10000">
+</form>
+<script>document.forms[0].submit();</script>
+
+The attacker auto-submits this hidden form when the victim visits the malicious page.
+
+CSRF vs. XSS
+CSRF exploits the server's trust in the browser (cookie-based session). XSS exploits the browser's trust in the server (injected scripts). CSRF does not require JavaScript and cannot read responses (same-origin policy blocks reading). XSS can do everything CSRF can and more. XSS-based CSRF protection bypass: if the site is vulnerable to XSS, most CSRF defences can be bypassed.
+
+Prevention
+
+CSRF Tokens (Synchroniser Token Pattern): The server generates a unique, unpredictable token per session (or per-request for stronger protection) and includes it in forms as a hidden field. On submission, the server validates the token. The attacker cannot know the token due to the same-origin policy. This is the most widely deployed defence.
+
+Double Submit Cookie: Send the CSRF token as both a cookie and a request parameter. The server verifies they match. An attacker cannot read the cookie value from a different origin, so they cannot set the matching parameter. Less secure than synchroniser tokens if cookie attributes are misconfigured.
+
+SameSite Cookie Attribute: The SameSite attribute (SameSite=Strict or SameSite=Lax) prevents browsers from including cookies in cross-site requests. Strict: no cookie in any cross-site request. Lax: no cookie in cross-site POST requests (allows GET for top-level navigation). SameSite=Strict/Lax is now default in modern browsers and provides strong CSRF protection when session cookies use this attribute.
+
+Verifying the Origin Header: Check that the Origin or Referer header matches the expected domain. Not foolproof (some browsers omit Referer, and HTTPS pages may not include it in requests to HTTP origins) but useful as a defence-in-depth layer.
+
+Clickjacking
+Clickjacking (UI redress attack) overlays a transparent or opaque iframe of a legitimate site over a malicious page. Users believe they are clicking on the attacker's site but are actually clicking on hidden elements of the legitimate site — unknowingly approving actions (liking posts, transferring funds, changing settings).
+
+Defence — X-Frame-Options header: Directs browsers not to render the page in a frame.
+X-Frame-Options: DENY prevents all framing.
+X-Frame-Options: SAMEORIGIN allows framing only from the same origin.
+
+Defence — Content Security Policy frame-ancestors directive: CSP's frame-ancestors replaces X-Frame-Options in modern browsers with more flexible control: Content-Security-Policy: frame-ancestors 'self' https://trusted.com.
+
+These headers must be set on all pages containing sensitive functionality, not just the login page.

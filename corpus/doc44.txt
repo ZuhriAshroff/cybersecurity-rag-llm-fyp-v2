@@ -1,0 +1,37 @@
+Title: VPN Technology — Protocols, Security, and Enterprise Use
+Source: NIST SP 800-77 Rev. 1 — Guide to IPsec VPNs / NIST SP 800-113 — Guide to SSL VPNs
+
+A Virtual Private Network (VPN) extends a private network across a public network (the internet), enabling secure remote access and site-to-site connectivity. VPNs encrypt traffic between endpoints, providing confidentiality and integrity for data traversing untrusted networks. They are foundational to remote work, branch office connectivity, and cloud access architectures.
+
+VPN Use Cases
+Remote access VPN: Employees connect their devices to the corporate network from home or while travelling. All corporate-bound traffic is encrypted between the client and the VPN gateway.
+
+Site-to-site VPN: Connects two or more office locations or data centres over the internet, replacing or supplementing expensive leased lines. Traffic appears to flow directly between sites across a secure encrypted tunnel.
+
+Cloud VPN: Extends on-premises networks into cloud environments (AWS Transit Gateway, Azure VPN Gateway, GCP Cloud VPN) or connects cloud VPCs to each other.
+
+VPN Protocols
+
+IPsec (Internet Protocol Security): Operates at Layer 3, providing authentication (AH — Authentication Header) and encryption (ESP — Encapsulating Security Payload). Used in IKEv2/IPsec for modern remote access and site-to-site VPNs. Strong security when properly configured; complex to set up.
+
+SSL/TLS VPN: Operates at Layer 4-7 using TLS. OpenVPN (open-source, widely deployed) and proprietary SSL VPNs (Cisco AnyConnect, Palo Alto GlobalProtect) operate over TCP/UDP port 443, enabling access through restrictive firewalls. Easier to deploy than IPsec; supports split-tunnelling granularly.
+
+WireGuard: A modern, lean VPN protocol (approximately 4,000 lines of code vs. OpenVPN's 70,000+). Uses state-of-the-art cryptography (Curve25519 for key exchange, ChaCha20-Poly1305 for encryption, BLAKE2 for hashing). Faster and easier to audit than IPsec or OpenVPN. Supported in the Linux kernel since 5.6. Used as the basis for commercial solutions (Tailscale, Cloudflare WARP, NordVPN, ExpressVPN).
+
+L2TP/PPTP: L2TP/IPsec and PPTP are legacy protocols with known weaknesses (PPTP is broken; use only for compatibility with very old systems that support nothing better). Not recommended for new deployments.
+
+Split Tunnelling
+Full tunnel: All client traffic routes through the VPN, providing complete visibility and control but increasing VPN gateway load and latency for internet traffic.
+
+Split tunnel: Only traffic destined for corporate resources routes through the VPN; internet traffic goes directly to the internet. Reduces gateway load and improves performance but removes visibility into internet activity and can be a security risk (client is simultaneously connected to corporate network and potentially untrusted networks).
+
+VPN Security Vulnerabilities
+VPN appliances are high-value targets because they are internet-facing, often run privileged, and provide broad network access if compromised. Major VPN vulnerabilities in recent years include:
+- Pulse Secure (CVE-2019-11510): Unauthenticated file read exposing credentials; exploited by APT groups including APT29.
+- Fortinet FortiGate (CVE-2018-13379): Path traversal allowing credential file reading; used in initial access in multiple APT campaigns.
+- Citrix ADC/Gateway (CVE-2019-19781): Remote code execution without authentication.
+
+Patch management for VPN appliances is critical. CISA repeatedly warns that these vulnerabilities remain exploited long after patches are available.
+
+VPN vs. Zero Trust Network Access
+Traditional VPN grants broad network access upon authentication. ZTNA grants access to specific applications only, with continuous verification of identity and device health. The cybersecurity community increasingly recommends replacing VPN with ZTNA for remote access as organisations mature their security posture.
