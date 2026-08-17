@@ -254,6 +254,11 @@ def load_finetuned_model():
     return model, tokenizer
 
 
+PHI2_MAX_POSITIONS = 2048  # phi-2's trained context window
+CONTEXT_TRUNCATION_MARGIN = 50  # headroom for special tokens / retokenization drift
+GENERATION_TOKEN_BUDGET = 256  # reserved for model.generate()'s max_new_tokens
+
+
 def query_finetuned(question: str, retriever, embeddings) -> dict:
     """Run question through fine-tuned Phi-2+LoRA; return same dict shape as query_pipeline()."""
     import torch
@@ -263,23 +268,53 @@ def query_finetuned(question: str, retriever, embeddings) -> dict:
     source_docs = retriever.invoke(question)
     context     = "\n\n".join(doc.page_content for doc in source_docs)
 
-    prompt = (
+    header = (
         "You are a cybersecurity domain expert.\n"
         "Using the retrieved context below, give a clear, synthesised answer drawn from the available sources.\n"
         "Always provide a concrete, best-effort answer — never refuse to answer.\n"
         "If the context only partially covers the question, answer what you can and note the gap briefly.\n\n"
-        f"Context:\n{context}\n\n"
-        f"Question: {question}\n\n"
-        "Answer:"
+        "Context:\n"
+    )
+    footer = f"\n\nQuestion: {question}\n\nAnswer:"
+
+    # Reserve space for the fixed instruction + Question/Answer template first,
+    # so truncation (if needed) only ever eats into the context — never the
+    # question, which previously got silently cut off by right-side truncation
+    # on the full assembled prompt. Also reserve GENERATION_TOKEN_BUDGET so the
+    # prompt + generated tokens together stay within PHI2_MAX_POSITIONS.
+    template_token_count = len(tokenizer(header + footer)["input_ids"])
+    available_context_tokens = max(
+        0,
+        PHI2_MAX_POSITIONS
+        - template_token_count
+        - GENERATION_TOKEN_BUDGET
+        - CONTEXT_TRUNCATION_MARGIN,
     )
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1500)
+    original_context_tokens = len(tokenizer(context)["input_ids"])
+
+    prior_truncation_side = tokenizer.truncation_side
+    tokenizer.truncation_side = "left"
+    try:
+        truncated_context_ids = tokenizer(
+            context, truncation=True, max_length=available_context_tokens
+        )["input_ids"]
+    finally:
+        tokenizer.truncation_side = prior_truncation_side
+
+    used_context_tokens = len(truncated_context_ids)
+    context_truncated = used_context_tokens < original_context_tokens
+    trimmed_context = tokenizer.decode(truncated_context_ids, skip_special_tokens=True)
+
+    prompt = header + trimmed_context + footer
+
+    inputs = tokenizer(prompt, return_tensors="pt")
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     with torch.no_grad():
         output_ids = model.generate(
             **inputs,
-            max_new_tokens=256,
+            max_new_tokens=GENERATION_TOKEN_BUDGET,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
         )
@@ -304,6 +339,9 @@ def query_finetuned(question: str, retriever, embeddings) -> dict:
         "confidence":      confidence,
         "sentence_scores": sentence_scores,
         "n_supported":     n_supported,
+        "context_truncated":       context_truncated,
+        "original_context_tokens": original_context_tokens,
+        "used_context_tokens":     used_context_tokens,
     }
 
 
