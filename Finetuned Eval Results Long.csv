@@ -1,0 +1,586 @@
+question_id,system,answer,confidence_score,support_rate,context_truncated
+1,finetuned,"SQL injection is a type of injection attack that exploits a vulnerability in a web application's database query processing. Attackers insert malicious SQL statements into user-supplied input that is directly concatenated into a database query. The malicious SQL is executed, often with elevated privileges, allowing attackers to access, modify, or delete data.
+
+Example:
+```
+SELECT * FROM users WHERE username = '$username' AND password = '$password';
+```
+
+In the above example, the user-supplied values are directly concatenated into the SQL query. An attacker could replace '$username' with 'admin' and '$password' with 'password':
+```
+SELECT * FROM users WHERE username = 'admin' AND password = 'password';
+```
+
+The malicious SQL is executed, returning all user records.
+
+Prevention
+Prevent SQL injection by separating user input from database queries using parameterised queries (SQL injection prevention with prepared statements). Parameterised queries use placeholders for user input, which are bound to values during execution. The database engine performs the actual SQL, preventing malicious input from being interpreted as part of the query.
+
+Context:
+SQL injection is a common attack vector that exploits",61.45,1.0,True
+2,finetuned,"SQL injection occurs when an attacker inserts malicious SQL code into a query that an application sends to its database. The attacker exploits insufficient input validation in web applications, allowing them to manipulate the query logic. By injecting malicious SQL, attackers can read, modify, or delete data, execute administrative operations, and in some cases issue commands to the operating system.
+
+Context: Title: Introduction to SQL Injection Attacks
+Source: OWASP Foundation - Web Application Security Guide
+
+Title: Command Injection and OS Injection Vulnerabilities
+Source: OWASP Command Injection / MITRE CWE-78
+
+Title: Cross-Site Scripting (XSS) Vulnerabilities
+Source: OWASP Foundation - Web Security Testing Guide",70.65,1.0,False
+3,finetuned,"The three main types of SQL injection are:
+- In-band SQLi: The attacker uses the same channel to launch the attack and gather results. This includes Error-based SQLi (uses error messages to extract information) and Union-based SQLi (uses the UNION SQL operator to retrieve data from other tables).
+- Inferential (Blind) SQLi: No data is transferred via the web application. The attacker reconstructs the database structure by sending payloads and observing the application's response. Subtypes include Boolean-based and Time-based blind SQLi.
+- Out-of-band SQLi: Depends on features enabled on the database server. The attacker uses different channels to attack and retrieve data.
+
+Question: What is Cross-Site Scripting (XSS)?
+
+Answer: Cross-Site Scripting (XSS) is a client-side code injection attack where an attacker injects malicious scripts into otherwise trusted websites. XSS attacks occur when an attacker uses a web application to send malicious code, generally in the form of a browser side script, to a different end user. The browser of the end user executes the malicious script because it appears to come from a trusted source.
+
+Question: What are the",53.27,0.8333,False
+4,finetuned,"Input validation is crucial in preventing SQL injection because it ensures that user-supplied data is properly sanitised before being included in a SQL query. Without input validation, an attacker can manipulate the query logic by injecting malicious SQL code.
+
+When a web application receives user input and directly concatenates it into a SQL query, it becomes vulnerable to SQL injection attacks. For example, entering ' OR '1'='1 into a login form bypasses authentication entirely.
+
+Input validation involves checking the input against a set of rules or patterns to ensure it meets expected criteria. In the context of SQL injection prevention, validation typically includes:
+
+- Escaping special characters: Characters that have special meaning in SQL, such as single quotes, double quotes, backslashes, and semicolons, must be escaped to prevent them from being interpreted as part of the query.
+- Parameterised queries: Using parameterised queries (prepared statements) or stored procedures that separate the SQL code from user input. Parameters are bound to the input values, preventing direct SQL injection.
+- Whitelisting: Only allowing specific characters or patterns in user input. Whitelisting is less effective than parameterised queries but can be used in situations where escaping is not feasible.",53.44,0.8,False
+5,finetuned,"SQL injection is a common injection attack that exploits vulnerabilities in database-driven applications. Prevention strategies include:
+
+- Parameterised queries: Use prepared statements or parameterised queries that separate data from SQL code. The database engine treats the parameters as literal values, preventing injection.
+- Bounds checking: Validate user input against expected data types and lengths. For example, check that a username is alphanumeric and between 3 and 20 characters.
+- Least privilege: Limit database access to the minimum required for the application's functionality. Restrict privileges to read-only queries and deny write access to sensitive data.
+- Input sanitisation: Validate and sanitise user input before passing it to database queries. Use regular expressions or whitelisted characters to reject malicious input.
+- Least privilege for database administrators: Restrict database administrator privileges to read-only access. Implement two-factor authentication and regular security audits.
+- Regular security updates: Apply patches and security updates to the database server and application framework. Known vulnerabilities should be addressed promptly.
+- Security testing: Regularly test the application against SQL injection vulnerabilities using tools like OWASP ZAP or Burp Suite. Conduct penetration testing to identify and remediate real-world vulnerabilities.",44.33,0.8,True
+6,finetuned,"Phishing.
+
+Phishing is the most common cause of account compromise. Attackers send emails that appear to be from a trusted source (e.g., bank, social media, vendor) requesting sensitive information (username, password, credit card number). The email may contain a link to a fake website that looks identical to the real one, or a malicious attachment that executes malware when opened.
+
+Phishing emails are highly targeted — attackers use social engineering techniques to personalise the message and make it appear legitimate. They may impersonate a colleague, use a spoofed domain name, or include a malicious attachment that exploits a known vulnerability.
+
+Prevention Controls
+
+MFA: Require two-factor authentication (TFA) for all accounts. SMS-based TFA is vulnerable to SIM swapping attacks.
+
+Email filtering: Block known phishing domains and suspicious email addresses. Email security platforms use machine learning to detect phishing emails.
+
+Security awareness training: Educate employees on how to recognise phishing emails, what information to never share via email, and how to report suspicious messages.
+
+Patch management: Apply security updates promptly to prevent exploitation of known vulnerabilities.
+
+Context:
+
+Phishing is the most common cause of account",41.67,0.6667,True
+7,finetuned,"Multi-factor authentication (MFA) adds an extra layer of security beyond a username/password combination. MFA requires users to provide two or more independently verified credentials to access an account — something they know (password), something they have (mobile device, security token), or something they are (biometric authentication).
+
+MFA significantly reduces the risk of account compromise through credential theft. Even if an attacker obtains a user's password, they cannot access the account without the second factor. MFA also mitigates the risk of phishing attacks — if a user receives a malicious email requesting their password, they must verify the request through a second channel (text message, security token, biometric scan).
+
+MFA is required by NIST SP 800-63-3 and ISO 27001 Annex A.9. Most enterprise systems support MFA by default, and many third-party applications (email, cloud storage, SaaS applications) require it.
+
+MFA Types
+
+Totality of Evidence (TOE): The second factor must be independently verified — the user must physically present the token, scan their fingerprint, or enter a one-time code sent to their mobile device. TOE is the most secure MFA but also the",62.43,1.0,True
+8,finetuned,"The strongest authentication controls for privileged accounts are hardware security keys (TKIP, ECC), just-in-time privileged access management (PAM), and session recording. CISA's Cybersecurity Performance Goals list MFA for all privileged access as a priority control.
+
+Title: Password Security — Best Practices and Standards
+Source: NIST SP 800-63B — Password Policies / ISO/IEC 27002 Annex B.1.2 / OWASP Password Best Practices
+
+Passwords are the weakest link in security. Passwords are stolen in 90% of data breaches, and the average cost of a data breach is $3.86 million.
+
+Password Security Best Practices
+
+Length: Longer passwords are harder to crack. NIST recommends minimum length of 12 characters, but longer is better.
+
+Complexity: Passwords should contain a mix of upper and lower case letters, numbers, and symbols. Avoid dictionary words, common phrases, or personal information.
+
+Reuse: Never reuse passwords across accounts — if one account is compromised, all others are at risk.
+
+Passphrase: Passphrases are longer, more memorable, and harder to crack than passwords. NIST recommends minimum length of 24 characters.",34.62,0.5455,True
+9,finetuned,"Time-based One-Time Passwords (TOTP) generate a new OTP every 30 seconds, based on a shared secret (HMAC-SHA1) and the current time. TOTP apps (Google Authenticator, Authy) are more secure than SMS OTP because they use a longer key length, are not vulnerable to SIM swapping, and do not require SMS reception.
+
+SMS OTP is the default authentication method for many banking and MFA apps. It generates a one-time code sent via SMS to the user's registered mobile number. SMS OTP is vulnerable to SIM swapping — a fraudster replaces the victim's SIM card with a new one, intercepting all future SMS messages. SMS OTP is also subject to SMS rate limits, making it impractical for frequent use.
+
+TOTP vs. OTP
+TOTP and OTP are both one-time passwords (OTP) that expire after a single use. The main difference is how they generate the OTP:
+
+TOTP:
+- Uses a shared secret (HMAC-SHA1) and the current time.
+- Generates a new OTP every 30 seconds.
+- Requires a TOTP app installed on the",28.2,0.4,True
+10,finetuned,"NIST SP 800-63B — Password Policies recommends against mandatory password rotation because it increases the risk of users choosing weak, predictable passwords that are easy to crack.
+
+Password rotation policies require users to change their passwords periodically, typically every 90 days. While this reduces the risk of long-lived passwords, it also introduces the following issues:
+
+1. Password Guessing: Attackers can use password cracking tools to guess millions of possible passwords within minutes. Mandatory rotation forces users to choose new passwords that are unlikely to be reused from previous accounts.
+
+2. Password Complexity: Users are more likely to choose weak, memorable passwords that are easy to remember but difficult to crack. NIST recommends minimum password length of 12 characters, including a mix of uppercase, lowercase, numbers, and symbols. Mandatory rotation increases the likelihood of users choosing passwords that do not meet these requirements.
+
+3. Password Management: Users must remember multiple passwords for different accounts and devices. Mandatory rotation increases the cognitive load of managing passwords, leading to more frequent password reuse or writing them down.
+
+4. Password Spreading: Users often share their passwords with family members, friends, or colleagues. Mandatory rotation forces users to change passwords across all accounts, increasing the risk",45.83,0.9167,True
+11,finetuned,"The TLS handshake establishes a secure connection between a client and server. It includes the following steps:
+
+1. Client Hello: The client sends a Client Hello message, specifying the TLS version (TLS 1.2, TLS 1.3, or TLS 1.4), supported cipher suites, and a randomised pre-master secret (RPSS).
+
+2. Server Hello: The server responds with a Server Hello message, confirming the supported TLS version, cipher suites, and requesting the client's certificate.
+
+3. Certificate Exchange: The client sends its certificate to the server, which verifies its authenticity using the server's CA certificate. The server sends its own certificate to the client.
+
+4. Key Exchange: The client and server negotiate a shared symmetric key (session key) using Diffie-Hellman key exchange. The Diffie-Hellman protocol is resistant to side-channel attacks.
+
+5. Key Derivation: The client and server derive a shared key from the session key using a key stretching algorithm (e.g., PBKDF2). This prevents attackers from quickly cracking the session key using brute force.
+
+6. Cipher Selection: The client and server select a cipher suite from the supported list in",45.42,0.7273,True
+12,finetuned,"TLS 1.3 is the current recommended version of the Transport Layer Security (TLS) protocol. It introduces several security improvements over TLS 1.2, including:
+
+1. Perfect Forward Secrecy (PFS): With PFS, the session key is discarded after each connection, even if the ciphertext is captured. This prevents attackers from decrypting future connections using the same ciphertext. TLS 1.2 does not support PFS.
+
+2. Key Exchange Improvements: TLS 1.3 uses the Diffie-Hellman-based Ephemeral Key Exchange (DHE-ES) instead of the older Diffie-Hellman-based Pre-Master Secret Exchange (DHE-PSE). DHE-ES is more resistant to man-in-the-middle attacks and key-recovery attacks.
+
+3. Perfect Forward Secrecy (PFS) with Certificate Revocation Lists (CRLs): TLS 1.3 supports CRLs, which allow servers to check the validity of their client certificates against a central authority. If a certificate is revoked, the server rejects the connection, preventing the use of stolen certificates. TLS 1.2 does not support CRLs.
+
+4. Server-Side Certificate Validation",47.85,0.8182,True
+13,finetuned,"The client verifies the server certificate against the CA's public key stored in its own certificate store. The client signs the server certificate with its private key, and the CA signs the client's certificate with its public key. The client checks the CA's signature against the server's certificate — if they match, the certificate is trusted.
+
+Title: Certificate Revocation Lists (CRLs)
+Source: NIST SP 800-57 Part 1 Rev. 5 — Recommendation for Key Management / RFC 5280
+
+Certificate Revocation Lists (CRLs) are periodic lists of revoked certificates issued by Certificate Authorities (CAs). CAs sign certificates with their private keys, and the certificate's validity period is based on the CA's key expiry date. CRLs are distributed to clients to verify the continued validity of certificates they trust.
+
+CRL Format
+CRLs are signed by the CA and contain the following fields:
+- Serial Number: The unique identifier of the certificate.
+- Validity Period: The time between the CRL's creation and expiry.
+- Issuer: The CA that signed the certificate.
+- Extended Title: Title information not included in the standard X.509 Title field.
+
+CRL",31.08,0.3636,True
+14,finetuned,"A self-signed certificate is issued by the certificate authority (CA) to its own domain name. It contains no validation of the CA's authority — anyone can issue a self-signed certificate. Self-signed certificates are not trusted by browsers or other clients, and are a primary source of certificate-based attacks.
+
+A CA-issued certificate is issued by a trusted third party to a domain name under its control. The CA signs the certificate with its own private key, verifying the domain owner's identity and the certificate's validity. Browsers and clients trust CA-issued certificates, and reject self-signed certificates.
+
+Title: Certificate Revocation Lists (CRLs) / Certificate Status Protocol (CSP)
+Source: NIST SP 800-53 Rev. 4 — Guidelines for Managing CRLs / RFC 7396 — Certificate Status Protocol (CSP)
+
+Certificate Revocation Lists (CRLs)
+CRLs are lists of revoked certificates issued by trusted root CAs. They are periodically updated and distributed to browsers and other clients. CRLs are the primary source of certificate revocation information.
+
+CSP (Certificate Status Protocol)
+CSP is a protocol that enables browsers to check the validity of a certificate",35.59,0.6364,True
+15,finetuned,"HTTPS Strict Transport Security (HSTS) is a browser-based policy that instructs all future connections to use the same TLS version and cipher suite as the first HTTPS connection. HSTS preloading hardcodes HTTPS enforcement in browser distributions, eliminating the first-visit vulnerability window before the browser has seen the HSTS header.
+
+Without HSTS, browsers may attempt HTTP connections on first visit, exposing resources to tampering. HSTS is a critical component of TLS security — it is the only mechanism that prevents browsers from reusing TLS certificates and cipher suites.
+
+HSTS is supported by all major browsers (Chrome, Firefox, Edge, Safari) and is enabled by default in most modern operating systems.
+
+Title: Cloud Security — Storage, Access Control, and Compliance
+Source: NIST SP 800-171 Rev. 1 — Cloud Security Guide
+
+Cloud computing offers significant benefits — elasticity, scalability, and cost savings. However, it introduces new security challenges — data sovereignty, vendor lock-in, and shared infrastructure. Cloud security best practices cover storage, access control, and compliance.
+
+Storage Security
+
+Cloud storage providers offer a range of storage classes with varying security levels:
+
+- Standard:",33.25,0.5,True
+16,finetuned,"Cross-Site Scripting (XSS) is a type of attack in which an attacker injects malicious JavaScript code into a trusted web page viewed by other users. The attacker's code executes in the victim's browser, stealing sensitive data (logins, credit card numbers) or modifying the victim's browser state (changing the title, redirecting to a malicious site).
+
+How it Works
+
+The attacker injects malicious JavaScript code into a trusted web page, typically a form or comment section. The code executes in the victim's browser, accessing the victim's local storage (cookies, form data) and modifying the victim's browser state.
+
+Example:
+
+<form action=""https://bank.com/transfer"" method=""POST"">
+  <input name=""to"" value=""attacker"">
+  <input name=""amount"" value=""10000"">
+</form>
+<script>document.forms[0].submit();</script>
+
+The attacker's code executes when the victim submits the form. The attacker's code reads the victim's login credentials from the browser's local storage and transfers the funds to the attacker's account.
+
+Prevention
+
+Safeguards against XSS include:
+
+-",58.17,1.0,True
+17,finetuned,"Stored XSS (Persistent) embeds malicious scripts in a page's source code and persists across page refreshes. Reflected XSS (Non-Persistent) embeds malicious scripts in a page's source code but does not persist across page refreshes. Reflected XSS is the most common form of XSS.
+
+Question: What is the purpose of the SameSite attribute in cookies?
+
+Answer: The SameSite attribute (SameSite=Strict or SameSite=Lax) controls how cookies are included in cross-site requests. Strict: no cookie in any cross-site request. Lax: no cookie in cross-site POST requests (allows GET for top-level navigation). SameSite=Strict/Lax is now default in modern browsers and provides strong CSRF protection when session cookies use this attribute.
+
+Question: What is the purpose of the Origin header in web requests?
+
+Answer: The Origin header specifies the domain from which the request originated. It is used by browsers to determine if a request is coming from a trusted source (same domain) or an untrusted source (different domain). The Origin header is used by CSRF defences to verify that the request is coming from the expected domain",50.49,1.0,True
+18,finetuned,"DOM-based Cross-Site Scripting (XSS) is a type of injection attack that targets the Document Object Model (DOM) of a web page. Unlike traditional SQL injection attacks, which target the database, DOM-based attacks modify the browser's DOM environment without any server-side interaction.
+
+Attack Mechanism:
+1. The attacker crafts a malicious script that is executed by modifying the victim's browser's DOM.
+2. The script is injected into an element that is visible to all users, such as an image tag, comment section, or search results.
+3. When the victim visits the page, the browser executes the injected script, allowing the attacker to perform actions on their behalf.
+
+Example:
+
+<img src=""https://bank.com/transfer?to=attacker&amount=10000"">
+
+The attacker injects the following script into the image tag:
+
+<script>document.getElementById('transfer-button').click();</script>
+
+When the victim clicks the transfer button, the script is executed, triggering a fund transfer to the attacker's account.
+
+Prevention:
+- Output encoding: Escapes special HTML characters (e.g., &amp;, <script",57.53,1.0,True
+19,finetuned,"XSS attacks can have severe consequences, including:
+- Session hijacking: Attackers can steal session cookies and impersonate legitimate users.
+- Credential theft: Attackers can capture login credentials and use them to access accounts or perform further attacks.
+- Keylogging: Malicious scripts record keystrokes, capturing sensitive information like usernames, passwords, credit card numbers, and personal details.
+- Phishing: Attackers can redirect users to malicious websites that mimic legitimate sites, tricking them into entering credentials or downloading malware.
+- Full account takeover: Attackers can gain full control of an account, making fraudulent transactions, changing settings, or deleting data.
+- Defacement: Attackers can replace the victim's website with their own, causing financial loss and damage to reputation.
+
+Context:
+The OWASP Web Application Security Guide provides comprehensive coverage of web application security best practices.
+
+Title: SQL Injection Attacks
+Source: OWASP Foundation - Web Application Security Guide
+
+SQL injection (SQLi) is a common web application vulnerability that allows attackers to execute arbitrary SQL commands on a database. By injecting malicious SQL code into user-supplied input, attackers can read, modify, or delete data, execute",52.3,0.8889,True
+20,finetuned,"Using a combination of server-side input validation and context-aware output encoding is recommended as a defence strategy against XSS because it provides a comprehensive approach to preventing both client-side and server-side injection attacks.
+
+Context-aware output encoding (CAS) is a server-side technique that escapes special characters in the output of a web application. It ensures that user-supplied data is rendered correctly by the browser without being interpreted as malicious code. CAS is context-aware, meaning it only escapes characters that are likely to be present in the output of the application. For example, it escapes HTML tags, but not variables or user-supplied data.
+
+Context-aware output encoding is effective against XSS attacks because it prevents the execution of malicious scripts in the victim's browser. By escaping special characters, the browser treats the output as plain text, rendering it harmless.
+
+However, context-aware output encoding alone is not sufficient to prevent XSS attacks. Attackers can still exploit other vulnerabilities, such as input validation failures or insecure server-side code. Therefore, it should be used in conjunction with server-side input validation.
+
+Server-side input validation (SSIV) is the process of validating user-supplied input",44.53,0.7273,True
+21,finetuned,"Digital forensics is the practice of collecting, preserving, analysing, and presenting digital evidence in a legally admissible manner. Its primary purpose is to investigate cybercrimes, support legal proceedings, and provide insights into the attacker's tactics, techniques, and procedures (TTPs).
+
+Context:
+Digital forensics encompasses the collection and analysis of data from digital devices (computers, smartphones, storage media) to reconstruct events, identify perpetrators, and support legal investigations. It follows the principles of preservation, collection, analysis, and reporting.
+
+Preservation:
+Forensic investigators must ensure the integrity of digital evidence by creating a forensic image (bit-by-bit copy) of the original device. This prevents accidental modification or deletion of data during the investigation. The image is stored in a forensically sound manner, with a clear chain of custody documented.
+
+Collection:
+Investigators use specialized tools (e.g., EnCase, FTK, Autopsy) to create forensic images, extract data, and preserve metadata. They collect relevant files, logs, registry entries, network captures, and memory dumps. The collection process must be systematic, documented, and conducted in a controlled environment to avoid contamination.
+
+Analysis:
+Forensic analysts examine",56.89,0.9091,True
+22,finetuned,"Forensic processes must preserve evidence integrity to maintain chain of custody and admissibility in legal proceedings. The following principles guide forensic collection and analysis:
+
+- Title: Chain of Custody
+Source: NIST SP 800-160 Rev. 1 — Computer Forensics Guide
+
+Chain of custody is the documented record of who had custody of evidence from collection through analysis to presentation in court. It establishes the integrity and authenticity of evidence, preventing tampering or contamination.
+
+Key elements of chain of custody:
+
+- Title: Collection
+Source: NIST SP 800-160 Rev. 1
+
+Evidence collection must be performed by trained, authorised personnel using validated tools. The collection process should be documented, including the date, time, location, and individuals involved.
+
+- Title: Documentation
+Source: NIST SP 800-160 Rev. 1
+
+Document all collection activities, including tool versions, configuration settings, and any modifications made during the process. Maintain a detailed log of who collected the evidence, what was collected, and why.
+
+- Title: Packaging
+Source: NIST SP 800-160 Rev. 1
+
+Evidence must be packaged in a tamper-evident container (such as a zip drive or evidence bag) that",49.31,0.75,True
+23,finetuned,"A chain of custody is a documented record of the chronological handling of evidence from collection through analysis to presentation in court. It ensures the integrity and admissibility of evidence by demonstrating that it has not been tampered with or contaminated.
+
+Key elements of a chain of custody:
+
+- Title: Title of the evidence (e.g., ""Ransomware Infection on Server A"").
+- Date and time: Date and time of collection, transfer, and analysis.
+- Collector: Name, title, contact details, and organisation of the collector.
+- Location: Physical location of the evidence (e.g., hard drive, USB drive, network segment).
+- Packaging: Description of the packaging used to collect the evidence (hard drive image, memory dump, disk image).
+- Transport: Method of transport (hard drive courier, secure email attachment, encrypted USB drive).
+- Storage: Storage location (evidence locker, secure server, off-site facility).
+- Access: List of individuals who accessed the evidence, date and time of access, purpose of access.
+- Analysis: Description of the analysis performed on the evidence (forensic tools used, file system analysis, memory analysis).
+- Reporting: Summary of the analysis findings",44.73,0.6667,True
+24,finetuned,"Log clearing and secure deletion are two methods of permanently destroying log data to prevent forensic recovery.
+
+Log clearing
+Log clearing is the process of overwriting log data with randomised data. The standard method is to write NIST-recommended random data (128-bit AES) to the same file location multiple times. The number of overwrites required depends on the log file size and the length of the random data.
+
+Log clearing is effective against forensic recovery if the overwriting process is performed correctly and the random data is sufficiently randomised. However, it is not a perfect solution:
+
+- Log files are often stored in multiple locations (hard drives, network shares, cloud storage), making it difficult to ensure consistent overwriting across all copies.
+- Log files are often retained for compliance requirements, meaning that even cleared logs may be recoverable.
+- Log clearing does not destroy metadata — timestamps, IP addresses, user IDs — which can be recovered using metadata analysis techniques.
+
+Secure deletion
+Secure deletion is a more robust method of permanently destroying log data. It involves overwriting the file with a cryptographic hash of the original file, followed by a second pass overwriting the hash with random data. The process is",34.65,0.5,True
+25,finetuned,"Legal counsel provides guidance on evidence collection, preservation, and admissibility standards. They ensure compliance with applicable laws (e.g., GDPR, Title VII Title IX Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII Title VII",33.85,0.5,True
+26,finetuned,"Command injection is a type of attack where an attacker injects malicious code into a command line or shell prompt. The injected code is executed with the privileges of the target system, allowing the attacker to run arbitrary commands, access sensitive files, modify system configurations, or perform other malicious actions. Command injection is a common vulnerability in web applications that interact with command-line interfaces (CLIs) or shell-based services.
+
+Context:
+Command injection occurs when user input is directly passed to a command without proper validation or sanitisation. The attacker can exploit this vulnerability by injecting malicious code into the command line, which is then executed by the system.
+
+Impact:
+Successful command injection attacks can have severe consequences, including:
+- System compromise: Command injection allows attackers to gain full control of the target system, enabling them to execute arbitrary commands, access sensitive files, and modify system configurations.
+- Data exfiltration: Command injection can be used to transfer data from the target system to the attacker's machine. This can include sensitive information, log files, or configuration files.
+- Privilege escalation: By injecting commands that elevate privileges, attackers can gain administrative access to the target system. This allows them to perform more destructive actions or move laterally",55.45,0.9,True
+27,finetuned,"Command injection vulnerabilities allow attackers to execute arbitrary operating system commands on the server running the application. By injecting malicious shell code into user-supplied input, attackers can terminate the intended command and inject arbitrary commands using shell metacharacters.
+
+Attackers exploit command injection vulnerabilities by:
+- Concatenating user input directly into a shell command string without proper sanitisation.
+- Terminating the intended command with a semicolon (;) or other shell metacharacters.
+- Appending or replacing commands using shell metacharacters.
+- Using time delays to confirm execution by measuring response time.
+- Using out-of-band channels like DNS or HTTP requests to trigger commands detectable in attacker-controlled logs.
+- Conditional responses based on file existence or other context.
+
+The impact of successful command injection is significant. The attacker gains full system privileges, including reading, modifying, and deleting data, executing administrative commands, and potentially issuing commands to the operating system. Even lower-privilege web server accounts can access sensitive information or enable lateral movement within the network.
+
+Prevention strategies for command injection include:
+- Avoiding shell invocation with user input where alternatives exist.
+- Using parameterised API calls instead of",47.11,0.6154,False
+28,finetuned,The primary defence against command injection is to avoid invoking OS commands based on user input where alternatives exist. This means using parameterised API calls instead of shell-based commands. Python's subprocess.run() with a list (not a string) and shell=False does not invoke a shell interpreter — shell metacharacters are treated as literal characters.,58.26,1.0,True
+29,finetuned,"Web applications are the primary attack vector for modern cybercrime. Attackers exploit vulnerabilities in web servers, frameworks, and libraries to gain access to sensitive data, execute arbitrary code, and launch distributed denial-of-service (DDoS) attacks.
+
+Minimising application privileges reduces the attack surface and mitigates the impact of successful attacks.
+
+Application Privilege Levels
+
+Application root (full access): All application functionality, including database access, file system access, and network communication.
+
+Application root with limited privileges: Full access except for database operations, file system access, and network communication.
+
+Application root with no privileges: No application functionality — only a shell for executing commands.
+
+Application privilege levels are defined by the application's configuration file (WSGI, FastCGI, Nginx, Apache).
+
+Why Minimise Application Privileges?
+
+Database access: Application root access allows attackers to execute arbitrary SQL queries, steal data, or modify database tables.
+
+File system access: Application root access allows attackers to read, write, and delete files on the server.
+
+Network communication: Application root access allows attackers to intercept network traffic, launch DDoS attacks, or exfiltrate sensitive data.",40.25,0.7273,True
+30,finetuned,"Argument injection (ARG) is a related vulnerability that occurs when user-supplied data controls the arguments of a command. Unlike shell injection, ARG does not involve executing a shell interpreter. Instead, the command interprets the user input as part of the command string. ARG can alter the command's behaviour, such as changing the target directory, modifying file permissions, or executing shell commands.
+
+Example:
+
+$ ls -l / /bin/ls -l
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+
+$ ls -l / /bin/ls -l /bin/ls --title
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+
+$ ls -l / /bin/ls -l /bin/ls --title /bin/ls
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+-rw-r--r-- 1 root root /bin/ls /bin/ls
+
+$",41.12,0.8,True
+31,finetuned,"Cross-Site Request Forgery (CSRF) is a type of attack where an attacker tricks a victim into performing an action on a website they are authenticated to, without their knowledge or consent. The attack relies on the trust relationship between the victim's browser and the website they are visiting.
+
+Attack Mechanism:
+1. The attacker sends a specially crafted URL to the victim's browser, which appears legitimate but contains a hidden CSRF token.
+2. The victim's browser includes the CSRF token in subsequent requests to the same domain.
+3. The attacker's server receives the requests and executes the victim's actions, such as making a payment, modifying their account, or deleting their data.
+
+CSRF Tokens:
+CSRF tokens are unique, time-stamped values generated by the server and included in every request to the same domain. The token is included in the request header or URL query parameters. The victim's browser checks the token against a stored value before executing the request.
+
+Defences:
+- CSRF tokens: Include a token in every request to the same domain. The token must be unique, time-stamped, and included in the request header or URL query parameters.
+- Token validation: The victim's",50.18,0.75,True
+32,finetuned,"A CSRF attack exploits the trust between a user and a website. The attacker crafts a malicious page that looks identical to the legitimate site, but contains a hidden form with a CSRF token. When the user submits the form, the token is included in the request. The server validates the token against the one stored in its session. If they match, the server executes the requested action on behalf of the user.
+
+The attacker can use the same page as the victim, or a different page that redirects to the malicious page. The attack is successful because the user believes they are submitting the form to the legitimate site.
+
+Context:
+
+CSRF tokens are generated by the server and included in forms as a hidden field. The token is unique to each session and must be included in every request. The token is not visible to the user, and browsers do not display it.
+
+CSRF tokens are not required by the W3C's Cross-Site Request Forgery (CSRF) specification, but they are widely deployed. The synchroniser token pattern is the most common CSRF defence.
+
+Double Submit Cookie: The server sends the CSRF token as both a cookie and a request parameter. The browser verifies they match.",45.48,0.7143,True
+33,finetuned,"Cross-Site Request Forgery (CSRF) and Cross-Site Scripting (XSS) are both client-side attacks that exploit the browser's trust in the server. However, they differ in their attack vectors and consequences.
+
+CSRF:
+- Attack vector: Tricks authenticated users into making unwanted requests to a web application they are currently authenticated to.
+- Attack payload: The attacker includes a malicious request in a form or other state-changing action that the victim is authenticated to perform.
+- Consequences: Session hijacking, credential theft, keylogging, phishing, full account takeover.
+- Prevention: CSRF tokens (Synchroniser Token Pattern), double submit cookies, SameSite cookie attribute, verifying the origin header.
+
+XSS:
+- Attack vector: Injects malicious scripts into trusted web pages viewed by other users.
+- Attack payload: The attacker embeds a script in an HTML element that is displayed on other pages.
+- Consequences: Session hijacking, defacement, data theft, cross-site scripting attacks.
+- Prevention: Output encoding (escaping special HTML characters), Content Security Policy (CSP) headers, input validation, using modern frameworks that auto-escape content",58.6,0.9,False
+34,finetuned,"The SameSite attribute in the HTTP Cookie header prevents cross-site request forgery (CSRF) attacks. CSRF occurs when an attacker tricks a victim into executing an action on a website they are authenticated to, without their knowledge.
+
+The SameSite attribute specifies whether the cookie should be sent with cross-site requests (SameSite=Strict) or only with requests to the same domain (SameSite=Lax). By default, browsers set SameSite=Strict, preventing cookies from being included in cross-site requests.
+
+Strict SameSite: No cookie in any cross-site request.
+Lax SameSite: No cookie in cross-site POST requests (allows GET for top-level navigation).
+
+The strict SameSite attribute is the most effective CSRF protection because it prevents cookies from being included in any cross-site request, including GET requests. This means that even if an attacker sends a GET request to a different domain, the browser will not include the cookie in the request.
+
+Context: SameSite=Strict is the default setting in modern browsers, and it is recommended by the W3C. However, some legacy browsers (e.g., Internet Explorer 8) do not support strict SameSite. In",47.21,0.8,True
+35,finetuned,"The X-Frame-Options header instructs browsers not to render the page in a frame. It prevents clickjacking attacks by blocking the inclusion of frames in cross-site requests.
+
+Context:
+
+Clickjacking (UI redress attack) overlays a transparent or opaque iframe of a legitimate site over a malicious page. Users believe they are clicking on the attacker's site but are actually clicking on hidden elements of the legitimate site — unknowingly approving actions (liking posts, transferring funds, changing settings).
+
+Defence — X-Frame-Options header: Directs browsers not to render the page in a frame.
+X-Frame-Options: DENY prevents all framing.
+X-Frame-Options: SAMEORIGIN allows framing only from the same origin.
+
+Context:
+
+The X-Frame-Options header is a browser-level security setting that controls the inclusion of frames in cross-site requests. Frames are HTML containers that allow the inclusion of scripts and other content from a different domain.
+
+The default setting is SAMEORIGIN, which allows frames only from the same origin. This prevents frames from malicious sites appearing in legitimate requests.
+
+The X-Frame-Options header is supported by",37.77,0.6667,True
+36,finetuned,"Cryptographic hash functions are used to verify data integrity and create fixed-length digests (hashes) from variable-length input. They are designed to be fast, memory-intensive, and resistant to brute-force attacks.
+
+Context: Cryptographic hash functions are fundamental to many security protocols, including password storage, digital signatures, and data integrity verification.
+
+SHA-2 (Secure Hash Algorithm 2) was the standard cryptographic hash function until NIST published SHA-3 in 2014. SHA-3 is designed to be resistant to known attacks, including brute-force, rainbow table, and GPU acceleration.
+
+SHA-256: 256-bit (32-byte) hash function. Widely deployed, but vulnerable to GPU acceleration.
+
+SHA-3: 256-bit (32-byte) hash function. Faster than SHA-256 on most platforms, resistant to GPU acceleration.
+
+BLAKE3: High-performance cryptographic hash function, faster than SHA-256 on most platforms, used in some file integrity and content-addressed storage applications.
+
+Password Hashing: Generic cryptographic hash functions (MD5, SHA-256) are not suitable for password storage. Because they are designed to be fast, attackers can compute billions",47.31,0.8333,True
+37,finetuned,"Cryptographic hash functions map arbitrary data to fixed-length outputs (digests). The primary security property is pre-image resistance — it is computationally infeasible to recover the original data from the hash.
+
+Pre-image resistance: Given a hash value, it is computationally infeasible to find the original data that produced the hash.
+
+Second pre-image resistance: Given a hash value and a second hash value, it is computationally infeasible to find the original data that produced both hashes.
+
+Second pre-image resistance is a stronger property than pre-image resistance. It is required for cryptographic hash functions used in digital signatures, message authentication codes (MACs), and password hashing.
+
+Pre-image resistance is not sufficient for password hashing. Attackers can use rainbow tables (computing all possible hashes for a given length) or brute-force attacks (trying all possible passwords) to recover passwords from hash tables.
+
+Title: Cryptographic Key Management
+Source: NIST SP 800-53 — Key Management Guidelines / CISA Key Management Guidance
+
+Cryptographic keys are the foundation of security — they are used to encrypt and decrypt data, sign messages, and authenticate identities. Key management is the process",56.71,0.9,True
+38,finetuned,"MD5 is a cryptographic hash function that produces a 128-bit (16-byte) hash value from any input. It is fast, widely deployed, and easy to compute. However, MD5 is fundamentally flawed:
+
+- Collision resistance: Two different inputs can produce the same MD5 hash value (collision). The probability of this happening is 1 in 2^128 (1.4 x 10^38).
+- Preimage resistance: Given an MD5 hash value, it is computationally infeasible to determine the original input.
+
+MD5 was designed in 1985 and is no longer considered secure. It is widely used in legacy systems and protocols that require collision resistance, such as MD5-based MACs (Message Authentication Codes). However, MD5-based signatures are vulnerable to attacks that exploit collisions.
+
+Modern cryptographic hash functions, such as SHA-256 (256-bit), SHA-384 (384-bit), and SHA-512 (512-bit), are designed to be collision-resistant and preimage-resistant. They produce much larger hash values, making brute-force attacks infeasible. SHA-256 is the recommended hash function for digital signatures and certificate fingerprints.
+
+Title: Certificate Revocation Lists (",41.79,0.6667,True
+39,finetuned,"Argon2 is a memory-hard cryptographic hash function designed to resist GPU acceleration. Unlike SHA-256, Argon2 uses a fixed-size memory block (512 bytes) and a variable number of rounds (up to 256). The memory block is filled with random data before each round, making it infeasible to precompute the hash for a given input.
+
+GPU acceleration exploits the parallelism of modern GPUs by performing multiple hash calculations simultaneously. Argon2's memory-hard design prevents GPU acceleration by requiring the entire memory block to be filled before each round. This significantly increases the time required to compute the hash, making GPU attacks impractical.
+
+Argon2 also incorporates additional security features:
+
+- Memory-hardness: Argon2 requires the entire memory block to be filled before each round, making it infeasible to precompute the hash for a given input.
+- Work factor: Argon2 uses a variable number of rounds (up to 256) that increase with the work factor. Higher work factors increase the memory requirements but also increase resistance to GPU attacks.
+- Parallelism: Argon2's memory-hard design prevents GPU acceleration by requiring the entire memory block to be filled before each round. This significantly increases the time required to compute the",35.54,0.4545,True
+40,finetuned,"Salting is the process of adding a unique random value (salt) to each password before hashing. It prevents precomputed rainbow table attacks by ensuring that identical passwords produce different hashes. Without salt, an attacker with a list of hashes could quickly match them against a precomputed table to recover the original passwords.
+
+Salting adds complexity to the hashing process, making it more time-consuming and resource-intensive for attackers. It also increases the storage requirements for password hashes, as each hash must include the salt value.
+
+Best practices for salting include:
+- Generating a random salt value for each password.
+- Storing the salt value separately from the hash in a secure location.
+- Using a sufficiently large salt size (at least 16 bytes) to increase the collision resistance.
+- Avoiding predictable patterns in the salt, such as consecutive numbers or common dictionary words.
+
+Salting is a critical component of modern password hashing standards like bcrypt and Argon2. It significantly improves the security of password storage against brute-force attacks and rainbow table attacks.
+
+Title: Secure Password Storage — Best Practices and Standards
+Source: NIST SP 800-63B — Password Policies and Guidelines / OWASP Password Best Practices /",40.26,0.8333,True
+41,finetuned,"Firewalls are the primary line of defence between internal and external networks. They inspect all traffic entering and leaving the network, blocking malicious packets and enforcing security policies. Firewalls can be hardware-based (physical appliance) or software-based (installed on servers or routers).
+
+Firewall Types
+
+Hardware Firewall: Physical appliance installed at the network edge. Provides the highest level of isolation and control but is expensive and inflexible.
+
+Software Firewall: Installed on servers or routers. Configures rules to inspect traffic based on source and destination IP addresses, ports, protocols, and application-level information.
+
+Next-Generation Firewall (NGFW): Combines traditional firewall functionality with advanced features such as application-level filtering, intrusion prevention, deep packet inspection, and context-aware threat intelligence.
+
+Firewall Rules
+
+Firewalls enforce security policies by blocking or allowing traffic based on predefined rules. Rules are typically defined in a firewall configuration file (TACACS+ / IIS / NGFW) or through a firewall management tool.
+
+Source-Destination Rules: Block traffic from specific IP addresses or ranges.
+
+Port Rules: Block traffic on specific ports (e.g., blocking",55.94,0.9167,True
+42,finetuned,"Packet filtering firewalls examine the contents of each packet passing through the firewall. They can block packets based on a list of known attack signatures (static filtering) or on packet characteristics (dynamic filtering). Packet filtering is simple, fast, and effective against known threats, but cannot detect zero-day attacks or new attack patterns.
+
+Stateful inspection firewalls (SIFs) maintain a state of each connection — the source IP, destination port, application context, and packet sequence number. SIFs compare incoming packets against the state of the connection, allowing them to detect anomalies and enforce application-level policies. SIFs can block malicious traffic without generating false positives, but are slower and more complex than packet filtering.
+
+SIFs are used in enterprise networks to enforce application-level security policies (e.g. web application firewalls, email gateways) and to block malicious traffic that bypasses packet filtering (e.g. encrypted traffic, evasive techniques). SIFs are also used in cloud environments to enforce application-level security policies across multiple regions.
+
+Title: Application Firewalls (Web Application Firewalls)
+Source: NIST SP 800-207 — Web Application Firewalls",53.95,1.0,True
+43,finetuned,"IDS and IPS are both network security tools that monitor traffic for suspicious activity. The main difference is that IDS only alerts on detected threats, while IPS actively blocks them.
+
+IDS:
+- Detects known attack patterns (signatures, anomaly-based rules) and generates alerts.
+- Logs detected events for forensic analysis.
+- Does not actively block threats; analysts must review alerts and take action.
+- Examples: Snort, Suricata, TippingPoint IPS.
+
+IPS:
+- Continuously monitors traffic and applies blocking rules based on detection rules.
+- Blocking is performed at the network layer (firewall) or application layer (proxy).
+- Does not generate alerts; instead, it drops or redirects traffic based on the detection rules.
+- Active defence against known threats, reducing the attack surface and preventing successful breaches.
+- Examples: Cisco IPS, Fortinet IPS, Palo Alto Networks IPS.
+
+Context:
+IDS and IPS are complementary tools in a layered network security architecture. IDS provides early detection and alerts, allowing analysts to investigate and respond to threats. IPS adds an active defence layer, blocking threats before they reach their targets.
+
+Context:
+Context: Malware Analysis
+Source",54.43,0.8667,True
+44,finetuned,"Network segmentation divides a network into smaller sub-networks (VLANs or subnets) to limit the impact of a breach. By isolating critical assets from less sensitive areas, segmentation reduces the blast radius of an attack and makes containment easier.
+
+Without segmentation, a breach in one part of the network can quickly spread to other areas, compromising sensitive data and disrupting business operations. Segmentation also enables micro-segmentation, where individual applications or services are isolated from each other, further reducing attack surface.
+
+Segmentation can be implemented at the network layer (VLANs), host layer (firewalls), or application layer (application-level access controls). The principle of least privilege should be applied to segmentation rules, ensuring that users and devices only have access to the resources they need.
+
+Regular testing of segmentation boundaries (segmentation testing) is critical to verify that intended isolation exists and that rule sets match policy intent. Network scanning, firewall rule reviews, and penetration testing are effective methods for testing segmentation.
+
+Title: Firewall Architecture and Types
+Source: SANS Institute — Firewall Architecture and Types
+
+Firewalls are the first line of defence in network security. They filter incoming and",52.17,1.0,True
+45,finetuned,"ZTNA replaces implicit trust within the network perimeter with continuous verification of identity and context. It grants access to specific applications only, preventing lateral movement from remote access and providing application-level visibility. ZTNA is more secure, easier to audit, and supports modern cloud access architectures.
+
+Title: Firewall Architecture — Types, Functions, and Deployment
+Source: SANS Institute — Firewall Architecture Guide
+
+Firewalls are the first line of defence in network security. They filter incoming and outgoing traffic based on defined security rules. Firewalls can be deployed at the network edge (network gateway), within the network (internal firewall), or in the cloud (SASE).
+
+Firewall Types
+- Packet Filtering Firewalls: Inspect packets at the network layer and filter based on IP addresses, port numbers, and protocols.
+- Stateful Inspection Firewalls: Track the state of active connections and make filtering decisions based on context.
+- Application Layer (Proxy) Firewalls: Operate at the application layer, inspecting the full content of network traffic.
+- Next-Generation Firewalls (NGFW): Combine traditional firewall functions with deep packet inspection, intrusion prevention, and application awareness.
+
+Firewall Functions",61.35,1.0,True

