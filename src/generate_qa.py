@@ -79,7 +79,7 @@ def generate_qa_pairs(doc_text: str, num_pairs: int = 6) -> list[dict]:
             '[{"question": "...", "answer": "..."}, ...]'
         )
         resp = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-20b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
             max_tokens=2048,
