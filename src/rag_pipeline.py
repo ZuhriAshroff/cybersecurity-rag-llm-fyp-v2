@@ -235,14 +235,24 @@ def load_finetuned_model():
     from transformers import AutoTokenizer, AutoModelForCausalLM
     from peft import PeftModel
 
-    print(f"Loading {PHI2_BASE} in float16 on CPU…")
     tokenizer = AutoTokenizer.from_pretrained(PHI2_BASE, trust_remote_code=True)
-    base_model = AutoModelForCausalLM.from_pretrained(
-        PHI2_BASE,
-        torch_dtype=torch.float16,
-        trust_remote_code=True,
-    )
-    base_model.to("cpu")
+
+    if torch.cuda.is_available():
+        print(f"Loading {PHI2_BASE} in float16 on GPU (device_map='auto')…")
+        base_model = AutoModelForCausalLM.from_pretrained(
+            PHI2_BASE,
+            torch_dtype=torch.float16,
+            trust_remote_code=True,
+            device_map="auto",
+        )
+    else:
+        print(f"Loading {PHI2_BASE} in float16 on CPU…")
+        base_model = AutoModelForCausalLM.from_pretrained(
+            PHI2_BASE,
+            torch_dtype=torch.float16,
+            trust_remote_code=True,
+        )
+        base_model.to("cpu")
 
     print(f"Attaching LoRA adapter from '{ADAPTER_PATH}'…")
     model = PeftModel.from_pretrained(base_model, ADAPTER_PATH)
@@ -250,7 +260,7 @@ def load_finetuned_model():
 
     _ft_model_cache["model"]     = model
     _ft_model_cache["tokenizer"] = tokenizer
-    print("Fine-tuned model ready.")
+    print(f"Fine-tuned model ready on device: {next(model.parameters()).device}")
     return model, tokenizer
 
 
