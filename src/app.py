@@ -279,7 +279,7 @@ st.markdown("""
   </h1>
   <p style="color:#8892a4;font-size:1rem;margin:0;">
     Retrieval-augmented cybersecurity Q&amp;A &nbsp;·&nbsp;
-    Llama 3.1 via Groq &nbsp;·&nbsp;
+    openai/gpt-oss-20b via Groq &nbsp;·&nbsp;
     Semantic chunking + cross-encoder reranking + hallucination scoring
   </p>
 </div>

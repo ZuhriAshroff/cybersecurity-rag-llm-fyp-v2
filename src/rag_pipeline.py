@@ -7,7 +7,7 @@ Pipeline architecture (updated):
                 ParentDocumentRetriever stores full source docs as parents
   - Retrieval:  k=10 candidate parent docs via child-level semantic search
   - Reranking:  cross-encoder/ms-marco-MiniLM-L-6-v2 → top 3 passed to LLM
-  - LLM:        Llama 3.1 8B via Groq
+  - LLM:        openai/gpt-oss-20b via Groq
   - Scoring:    cosine-similarity hallucination confidence per sentence
 
 Next phases:
@@ -182,7 +182,7 @@ Answer:"""
         template=prompt_template,
         input_variables=["context", "question"],
     )
-    llm   = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+    llm   = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
     chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
@@ -254,9 +254,20 @@ def load_finetuned_model():
     return model, tokenizer
 
 
-PHI2_MAX_POSITIONS = 2048  # phi-2's trained context window
+PHI2_MAX_POSITIONS_FALLBACK = 2048  # used only if introspection below fails
 CONTEXT_TRUNCATION_MARGIN = 50  # headroom for special tokens / retokenization drift
 GENERATION_TOKEN_BUDGET = 256  # reserved for model.generate()'s max_new_tokens
+
+
+def _real_max_positions(model, tokenizer) -> int:
+    """Phi-2's actual context window, read from the loaded model/tokenizer rather
+    than assumed, so this never silently drifts from whatever checkpoint is loaded."""
+    max_positions = getattr(model.config, "max_position_embeddings", None)
+    if not max_positions:
+        max_positions = getattr(tokenizer, "model_max_length", None)
+    if not max_positions or max_positions > 1_000_000:  # unset sentinel guard
+        max_positions = PHI2_MAX_POSITIONS_FALLBACK
+    return max_positions
 
 
 def query_finetuned(question: str, retriever, embeddings) -> dict:
@@ -281,17 +292,24 @@ def query_finetuned(question: str, retriever, embeddings) -> dict:
     # so truncation (if needed) only ever eats into the context — never the
     # question, which previously got silently cut off by right-side truncation
     # on the full assembled prompt. Also reserve GENERATION_TOKEN_BUDGET so the
-    # prompt + generated tokens together stay within PHI2_MAX_POSITIONS.
+    # prompt + generated tokens together stay within the model's real context window.
+    real_max_positions = _real_max_positions(model, tokenizer)
+
     template_token_count = len(tokenizer(header + footer)["input_ids"])
     available_context_tokens = max(
         0,
-        PHI2_MAX_POSITIONS
+        real_max_positions
         - template_token_count
         - GENERATION_TOKEN_BUDGET
         - CONTEXT_TRUNCATION_MARGIN,
     )
 
-    original_context_tokens = len(tokenizer(context)["input_ids"])
+    # verbose=False: this intentionally tokenizes the raw, untruncated context to
+    # measure how much would need trimming — it's expected to exceed the model's
+    # max length for long retrievals, so the library's generic overflow warning
+    # would be misleading noise here. We log our own warning below instead, only
+    # when truncation actually happens.
+    original_context_tokens = len(tokenizer(context, verbose=False)["input_ids"])
 
     prior_truncation_side = tokenizer.truncation_side
     tokenizer.truncation_side = "left"
@@ -306,9 +324,51 @@ def query_finetuned(question: str, retriever, embeddings) -> dict:
     context_truncated = used_context_tokens < original_context_tokens
     trimmed_context = tokenizer.decode(truncated_context_ids, skip_special_tokens=True)
 
+    if context_truncated:
+        print(
+            f"WARNING: context truncated to fit the token budget — would have been "
+            f"{template_token_count + original_context_tokens} tokens (over the "
+            f"{real_max_positions}-token limit); trimmed context from "
+            f"{original_context_tokens} to {used_context_tokens} tokens."
+        )
+
     prompt = header + trimmed_context + footer
 
-    inputs = tokenizer(prompt, return_tensors="pt")
+    # Hard safety net: retokenizing the reassembled string can drift a few tokens
+    # from the token-id-level budget above (BPE merges differ at the splice
+    # points). If that ever pushes the prompt + generation budget over the
+    # model's real limit, trim the context a little further and retry, rather
+    # than silently handing the model an over-length sequence.
+    for _ in range(3):
+        inputs = tokenizer(prompt, return_tensors="pt", verbose=False)
+        final_prompt_tokens = inputs["input_ids"].shape[-1]
+        if final_prompt_tokens + GENERATION_TOKEN_BUDGET <= real_max_positions:
+            break
+        overflow = final_prompt_tokens + GENERATION_TOKEN_BUDGET - real_max_positions
+        print(
+            f"WARNING: reassembled prompt drifted {overflow} token(s) over budget "
+            f"({final_prompt_tokens} prompt + {GENERATION_TOKEN_BUDGET} generation > "
+            f"{real_max_positions}) — trimming context further before generation."
+        )
+        tokenizer.truncation_side = "left"
+        truncated_context_ids = tokenizer(
+            trimmed_context, truncation=True,
+            max_length=max(0, len(truncated_context_ids) - overflow - 5),
+        )["input_ids"]
+        tokenizer.truncation_side = prior_truncation_side
+        used_context_tokens = len(truncated_context_ids)
+        context_truncated = True
+        trimmed_context = tokenizer.decode(truncated_context_ids, skip_special_tokens=True)
+        prompt = header + trimmed_context + footer
+    else:
+        final_prompt_tokens = tokenizer(prompt, return_tensors="pt", verbose=False)["input_ids"].shape[-1]
+
+    assert final_prompt_tokens + GENERATION_TOKEN_BUDGET <= real_max_positions, (
+        f"Prompt ({final_prompt_tokens} tokens) + generation budget "
+        f"({GENERATION_TOKEN_BUDGET}) still exceeds the model's real context window "
+        f"({real_max_positions}) after correction — this should never happen."
+    )
+
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     with torch.no_grad():
@@ -366,7 +426,7 @@ def run_query(chain, question, embeddings):
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     print("FYP Baseline RAG — CB013309")
-    print("Cybersecurity | Llama 3.1 (Groq) | Semantic chunking + cross-encoder reranking\n")
+    print("Cybersecurity | openai/gpt-oss-20b (Groq) | Semantic chunking + cross-encoder reranking\n")
 
     docs                  = load_corpus()
     retriever, embeddings = build_retriever(docs)
