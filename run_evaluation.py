@@ -53,6 +53,65 @@ OUTPUT_CSV_DEFAULT = os.path.join(REPO_ROOT, "evaluation_results.csv")
 import re as _re
 _QUESTION_PATTERN = _re.compile(r"Question:\s*(.+?)\s*\nContext:", _re.DOTALL)
 
+# ── Baseline (Groq) rate-limit handling ──────────────────────────────────────
+# Free-tier Groq is capped at 8,000 tokens/minute — back-to-back calls burn
+# through that fast, so we pace requests and retry 429s with the server's own
+# suggested backoff before giving up.
+BASELINE_CALL_DELAY_SEC = 2.5      # pause between consecutive baseline calls
+BASELINE_MAX_RETRIES = 2           # retries per question on a 429 before giving up
+BASELINE_DEFAULT_BACKOFF_SEC = 5.0  # fallback wait if the error has no parseable duration
+
+_RETRY_AFTER_PATTERN = _re.compile(r"try again in\s+([\d.]+)\s*(ms|s)\b", _re.IGNORECASE)
+
+
+def _parse_retry_after_seconds(error_text: str) -> float:
+    """Extract the wait time from a Groq/OpenAI-style '...Please try again in
+    1.234s.' or '...in 800ms.' message. Falls back to a fixed backoff if the
+    message doesn't contain a parseable duration."""
+    match = _RETRY_AFTER_PATTERN.search(error_text)
+    if not match:
+        return BASELINE_DEFAULT_BACKOFF_SEC
+    value, unit = match.groups()
+    value = float(value)
+    return value / 1000.0 if unit.lower() == "ms" else value
+
+
+def _is_rate_limit_error(e: Exception) -> bool:
+    """Best-effort 429 detection across however the Groq/OpenAI-compatible
+    client surfaces it (a status_code attribute, an exception class name, or
+    just the text of the message)."""
+    if getattr(e, "status_code", None) == 429:
+        return True
+    text = str(e)
+    if "429" in text:
+        return True
+    if "rate limit" in text.lower() or "ratelimit" in type(e).__name__.lower():
+        return True
+    return False
+
+
+def query_baseline_with_retry(chain, question, embeddings):
+    """Run the baseline pipeline, retrying on 429s with the server-suggested
+    (or a fixed default) backoff. Non-429 errors are raised immediately —
+    unchanged from the previous behaviour of logging and moving on."""
+    import rag_pipeline as rp  # main() imports this as a local, not a global
+
+    attempt = 0
+    while True:
+        try:
+            t0 = time.time()
+            r = rp.query_pipeline(chain, question, embeddings)
+            elapsed = time.time() - t0
+            return r, elapsed
+        except Exception as e:
+            if not _is_rate_limit_error(e) or attempt >= BASELINE_MAX_RETRIES:
+                raise
+            wait = _parse_retry_after_seconds(str(e))
+            attempt += 1
+            print(f"  baseline:   429 rate limit — waiting {wait:.1f}s before "
+                  f"retry {attempt}/{BASELINE_MAX_RETRIES}...")
+            time.sleep(wait)
+
 
 def extract_question(row: dict) -> str:
     """Pull the bare question out of the training-format 'prompt' field.
@@ -185,9 +244,7 @@ def main():
 
             # Baseline
             try:
-                t0 = time.time()
-                r = rp.query_pipeline(chain, question, embeddings)
-                elapsed = time.time() - t0
+                r, elapsed = query_baseline_with_retry(chain, question, embeddings)
                 out_row.update({
                     "baseline_answer": r["answer"],
                     "baseline_confidence": round(r["confidence"], 2),
@@ -208,6 +265,10 @@ def main():
                     "baseline_error": str(e),
                 })
                 print(f"  baseline:   ERROR — {e}")
+
+            # Pace baseline calls so we don't immediately re-hit the free-tier
+            # tokens/minute cap on the next question.
+            time.sleep(BASELINE_CALL_DELAY_SEC)
 
             # Fine-tuned
             if finetuned_ready:
