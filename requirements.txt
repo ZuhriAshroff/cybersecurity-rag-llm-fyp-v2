@@ -19,6 +19,7 @@ sentence-transformers
 # UI
 streamlit
 plotly
+markdown
 
 # Fine-tuned model (Phi-2 + QLoRA)
 torch

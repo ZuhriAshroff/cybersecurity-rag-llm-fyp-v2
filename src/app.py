@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import markdown as md_lib
 from rag_pipeline import (
     load_corpus, build_retriever, build_chain,
     score_hallucination, query_pipeline, query_finetuned,
@@ -145,6 +146,43 @@ section[data-testid="stMain"] > div {
   opacity:   0.85 !important;
   transform: translateY(-1px) !important;
 }
+
+/* ── Answer content (parsed markdown from LLM output) ── */
+.answer-content p { margin: 0 0 0.75rem; }
+.answer-content p:last-child { margin-bottom: 0; }
+.answer-content strong { color: #e2e8f0; font-weight: 700; }
+.answer-content ul, .answer-content ol { margin: 0.5rem 0 0.75rem; padding-left: 1.4rem; }
+.answer-content li { margin-bottom: 0.35rem; }
+.answer-content code {
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.85em;
+}
+.answer-content table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+}
+.answer-content th, .answer-content td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+.answer-content th {
+  background: rgba(100,255,218,0.06);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.answer-content tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
 
 /* ── Spinner / alerts ── */
 [data-testid="stSpinner"] p { color: var(--accent) !important; }
@@ -308,11 +346,19 @@ def compute_reliability_bins(df: pd.DataFrame, system: str, n_bins: int = 4) -> 
     return grouped
 
 
+def render_answer_html(answer: str) -> str:
+    """Convert the model's raw markdown answer (bold, lists, tables, ...) into
+    real HTML, instead of dumping it into a single <p> — a <p> can't legally
+    contain block-level content like a table, so browsers silently mangle the
+    layout when it tries to."""
+    return md_lib.markdown(answer, extensions=["tables", "fenced_code", "nl2br"])
+
+
 def render_pipeline_result(result: dict) -> None:
     st.markdown(eyebrow("Answer"), unsafe_allow_html=True)
     st.markdown(
-        card(f'<p style="margin:0;color:#e2e8f0;font-size:0.95rem;line-height:1.75;">'
-             f'{result["answer"]}</p>'),
+        card(f'<div class="answer-content" style="color:#e2e8f0;font-size:0.95rem;'
+             f'line-height:1.75;">{render_answer_html(result["answer"])}</div>'),
         unsafe_allow_html=True,
     )
     st.markdown(eyebrow("Confidence Score"), unsafe_allow_html=True)
