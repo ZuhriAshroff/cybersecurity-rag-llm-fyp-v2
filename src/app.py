@@ -19,7 +19,7 @@ st.set_page_config(
     page_title="CyberRAG",
     page_icon="🔐",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 # ── Styles ────────────────────────────────────────────────────────────────────
@@ -60,39 +60,58 @@ section[data-testid="stMain"] > div {
   z-index: 0;
 }
 [data-testid="stHeader"]  { background: transparent !important; }
-[data-testid="stSidebar"] { display: none !important; }
 [data-testid="stVerticalBlock"],
 [data-testid="stHorizontalBlock"],
 .block-container { background: transparent !important; }
-.block-container { max-width: 1100px !important; padding-top: 0 !important; }
-*, *::before, *::after { font-family: 'Space Grotesk', sans-serif !important; }
+.block-container { max-width: 1100px !important; padding-top: 1rem !important; }
+*:not([data-testid="stIconMaterial"]),
+*::before, *::after { font-family: 'Space Grotesk', sans-serif !important; }
 
-/* ── Tabs ── */
-[data-testid="stTabs"] { margin-top: 0.5rem; }
-[data-baseweb="tab-list"] {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-  gap: 0 !important;
+/* ── Sidebar nav ── */
+[data-testid="stSidebar"] {
+  background: #0a0c10 !important;
+  border-right: 1px solid var(--border) !important;
 }
-[data-baseweb="tab"] {
-  background: transparent !important;
+[data-testid="stSidebar"] > div { padding-top: 1.5rem !important; }
+[data-testid="stSidebar"] [role="radiogroup"] { gap: 2px !important; }
+[data-testid="stSidebar"] [role="radiogroup"] label {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0.85rem 1rem !important;
+  margin-bottom: 2px !important;
+  border-radius: 8px !important;
+  border-left: 3px solid transparent !important;
+  cursor: pointer !important;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease) !important;
+}
+[data-testid="stSidebar"] [role="radiogroup"] label:hover {
+  background: rgba(255,255,255,0.04) !important;
+}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
+  background: var(--accent-glow) !important;
+  border-left-color: var(--accent) !important;
+}
+[data-testid="stSidebar"] [role="radiogroup"] label > div:first-child {
+  display: none !important;
+}
+[data-testid="stSidebar"] [role="radiogroup"] label p {
   color: var(--text-muted) !important;
   font-weight: 600 !important;
-  font-size: 0.85rem !important;
-  letter-spacing: 0.04em !important;
-  padding: 0.75rem 1.5rem !important;
-  border: none !important;
-  border-bottom: 2px solid transparent !important;
-  transition: color 0.3s var(--ease), border-color 0.3s var(--ease) !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.02em !important;
+  margin: 0 !important;
 }
-[aria-selected="true"][data-baseweb="tab"] {
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {
   color: var(--accent) !important;
-  border-bottom-color: var(--accent) !important;
 }
-[data-baseweb="tab-panel"] { padding: 2rem 0 0 !important; background: transparent !important; }
-[data-baseweb="tab-highlight"] { display: none !important; }
 
 /* ── Input ── */
+[data-testid="stTextInput"] [data-baseweb="base-input"],
+[data-testid="stTextInputRootElement"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 [data-testid="stTextInput"] input {
   background:    rgba(255,255,255,0.04) !important;
   border:        1px solid var(--border) !important;
@@ -351,16 +370,27 @@ st.markdown("""
 with st.spinner("Loading knowledge base…"):
     chain, retriever, embeddings = load_pipeline()
 
-# ── Tabs ──────────────────────────────────────────────────────────────────────
-tab_rag, tab_eval, tab_calibration = st.tabs(
-    ["RAG Assistant", "Evaluation Dashboard", "Calibration"]
-)
+# ── Sidebar navigation ─────────────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown(
+        '<div style="padding:0 0.5rem 1.5rem;">'
+        '  <span style="font-size:1.3rem;font-weight:700;color:#e2e8f0;">Cyber'
+        '<span style="color:#64ffda;">RAG</span></span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    nav_choice = st.radio(
+        label="Navigate",
+        options=["RAG Assistant", "Evaluation Dashboard", "Calibration"],
+        label_visibility="collapsed",
+        key="nav_choice",
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 1 — RAG Assistant
+# SECTION — RAG Assistant
 # ════════════════════════════════════════════════════════════════════════════
-with tab_rag:
+if nav_choice == "RAG Assistant":
     col_q, col_btn = st.columns([5, 1])
     with col_q:
         question = st.text_input(
@@ -383,9 +413,9 @@ with tab_rag:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Evaluation Dashboard
+# SECTION — Evaluation Dashboard
 # ════════════════════════════════════════════════════════════════════════════
-with tab_eval:
+elif nav_choice == "Evaluation Dashboard":
     st.markdown(eyebrow("Evaluation Dashboard"), unsafe_allow_html=True)
     st.markdown("""
     <p style="color:#8892a4;font-size:0.9rem;margin:0 0 2rem;">
@@ -526,9 +556,9 @@ with tab_eval:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 3 — Calibration
+# SECTION — Calibration
 # ════════════════════════════════════════════════════════════════════════════
-with tab_calibration:
+elif nav_choice == "Calibration":
     st.markdown(eyebrow("Calibration Analysis"), unsafe_allow_html=True)
     st.markdown("""
     <p style="color:#8892a4;font-size:0.9rem;margin:0 0 2rem;max-width:52rem;">
