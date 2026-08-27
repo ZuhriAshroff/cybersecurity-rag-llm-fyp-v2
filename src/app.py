@@ -3,9 +3,16 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
 from rag_pipeline import (
     load_corpus, build_retriever, build_chain,
     score_hallucination, query_pipeline, query_finetuned,
+)
+
+CALIBRATION_CSV = os.path.join(
+    os.path.dirname(__file__), "..", "Calibration Dataset for Model Analysis.csv"
 )
 
 st.set_page_config(
@@ -226,6 +233,62 @@ def col_header(title: str, badge: str = "") -> str:
     )
 
 
+def calibration_stat_card_html(system_label: str, color: str, accuracy: float,
+                                brier: float, corr: float, n: int) -> str:
+    return (
+        f'<p style="margin:0 0 0.5rem;font-size:0.75rem;font-weight:700;'
+        f'letter-spacing:0.08em;text-transform:uppercase;color:{color};">{system_label}</p>'
+        f'<div style="display:flex;gap:2rem;flex-wrap:wrap;">'
+        f'  <div><span style="font-size:2rem;font-weight:700;color:#e2e8f0;">{accuracy:.0%}</span>'
+        f'    <p style="margin:0;color:#8892a4;font-size:0.78rem;">accuracy ({n} labeled answers)</p></div>'
+        f'  <div><span style="font-size:2rem;font-weight:700;color:#e2e8f0;">{corr:.2f}</span>'
+        f'    <p style="margin:0;color:#8892a4;font-size:0.78rem;">confidence↔correctness correlation</p></div>'
+        f'  <div><span style="font-size:2rem;font-weight:700;color:#e2e8f0;">{brier:.3f}</span>'
+        f'    <p style="margin:0;color:#8892a4;font-size:0.78rem;">Brier score (lower = better calibrated)</p></div>'
+        f'</div>'
+    )
+
+
+@st.cache_data(show_spinner=False)
+def load_calibration_data():
+    """Load the human-labeled evaluation set (question_id, system, answer,
+    confidence_score, support_rate, context_truncated, correct). Returns None
+    if the file doesn't exist yet (e.g. label_review.py hasn't been run)."""
+    if not os.path.isfile(CALIBRATION_CSV):
+        return None
+    df = pd.read_csv(CALIBRATION_CSV)
+    df["confidence_score"] = pd.to_numeric(df["confidence_score"], errors="coerce")
+    df["correct"] = pd.to_numeric(df["correct"], errors="coerce")
+    df = df.dropna(subset=["confidence_score", "correct", "system"])
+    df["correct"] = df["correct"].astype(int)
+    return df
+
+
+def compute_calibration_stats(df: pd.DataFrame, system: str) -> dict:
+    sub = df[df["system"] == system]
+    conf = sub["confidence_score"] / 100.0
+    correct = sub["correct"]
+    accuracy = correct.mean()
+    brier = ((conf - correct) ** 2).mean()
+    corr = conf.corr(correct) if conf.nunique() > 1 and correct.nunique() > 1 else float("nan")
+    return {"accuracy": accuracy, "brier": brier, "corr": corr, "n": len(sub)}
+
+
+def compute_reliability_bins(df: pd.DataFrame, system: str, n_bins: int = 4) -> pd.DataFrame:
+    """Bin answers into quantiles of confidence_score and compute, per bin,
+    the mean predicted confidence vs. the actual observed accuracy — the
+    standard reliability-diagram view of calibration."""
+    sub = df[df["system"] == system].sort_values("confidence_score").reset_index(drop=True)
+    sub["bin"] = pd.qcut(sub.index, q=min(n_bins, len(sub)), labels=False, duplicates="drop")
+    grouped = sub.groupby("bin").agg(
+        mean_confidence=("confidence_score", "mean"),
+        actual_accuracy=("correct", "mean"),
+        n=("correct", "size"),
+    ).reset_index(drop=True)
+    grouped["actual_accuracy"] *= 100
+    return grouped
+
+
 def render_pipeline_result(result: dict) -> None:
     st.markdown(eyebrow("Answer"), unsafe_allow_html=True)
     st.markdown(
@@ -289,7 +352,9 @@ with st.spinner("Loading knowledge base…"):
     chain, retriever, embeddings = load_pipeline()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab_rag, tab_eval = st.tabs(["RAG Assistant", "Evaluation Dashboard"])
+tab_rag, tab_eval, tab_calibration = st.tabs(
+    ["RAG Assistant", "Evaluation Dashboard", "Calibration"]
+)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -458,3 +523,125 @@ with tab_eval:
                     ),
                     unsafe_allow_html=True,
                 )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 3 — Calibration
+# ════════════════════════════════════════════════════════════════════════════
+with tab_calibration:
+    st.markdown(eyebrow("Calibration Analysis"), unsafe_allow_html=True)
+    st.markdown("""
+    <p style="color:#8892a4;font-size:0.9rem;margin:0 0 2rem;max-width:52rem;">
+      Accuracy and calibration are different questions. Accuracy asks <em>"is the answer
+      right?"</em> Calibration asks <em>"does the confidence score actually tell you whether
+      the answer is right?"</em> A model can be less accurate overall yet more trustworthy in
+      practice, if its confidence reliably rises and falls with correctness — that's what this
+      page checks, against 90 human-labeled answers (45 baseline, 45 fine-tuned) held out from
+      training.
+    </p>
+    """, unsafe_allow_html=True)
+
+    cal_df = load_calibration_data()
+
+    if cal_df is None:
+        st.markdown(
+            card_muted(
+                '<p style="font-weight:600;color:#8892a4;margin:0 0 0.5rem;">'
+                'No labeled evaluation data found</p>'
+                '<p style="color:#8892a4;font-size:0.85rem;margin:0;line-height:1.6;">'
+                'Run <code style="color:#64ffda;">label_review.py</code> and place its output '
+                'at the repo root as '
+                '<code style="color:#64ffda;">Calibration Dataset for Model Analysis.csv</code>.'
+                '</p>'
+            ),
+            unsafe_allow_html=True,
+        )
+    else:
+        base_stats = compute_calibration_stats(cal_df, "baseline")
+        ft_stats   = compute_calibration_stats(cal_df, "finetuned")
+
+        st.markdown(
+            card(
+                calibration_stat_card_html("Baseline", "#64ffda", **base_stats)
+                + '<div style="height:1px;background:rgba(255,255,255,0.08);margin:1.25rem 0;"></div>'
+                + calibration_stat_card_html("Fine-tuned", "#a78bfa", **ft_stats)
+            ),
+            unsafe_allow_html=True,
+        )
+
+        # ── Reliability diagram ────────────────────────────────────────────
+        st.markdown(eyebrow("Reliability Diagram"), unsafe_allow_html=True)
+        st.markdown("""
+        <p style="color:#8892a4;font-size:0.85rem;margin:0 0 1rem;">
+          Answers are grouped into confidence quartiles. A line that climbs steadily toward
+          the dashed diagonal means confidence is discriminating correct from incorrect
+          answers; a flat line means confidence isn't telling you much.
+        </p>
+        """, unsafe_allow_html=True)
+
+        fig_rel = go.Figure()
+        fig_rel.add_trace(go.Scatter(
+            x=[0, 100], y=[0, 100], mode="lines",
+            line=dict(color="rgba(136,146,164,0.4)", dash="dash", width=1.5),
+            name="Perfect calibration", hoverinfo="skip",
+        ))
+        for system, color, label in [("baseline", "#64ffda", "Baseline"),
+                                      ("finetuned", "#a78bfa", "Fine-tuned")]:
+            bins = compute_reliability_bins(cal_df, system)
+            fig_rel.add_trace(go.Scatter(
+                x=bins["mean_confidence"], y=bins["actual_accuracy"],
+                mode="lines+markers", name=label,
+                line=dict(color=color, width=3),
+                marker=dict(size=10, color=color),
+                hovertemplate=f"{label}<br>Confidence: %{{x:.0f}}%<br>"
+                              "Actual accuracy: %{y:.0f}%<extra></extra>",
+            ))
+        fig_rel.update_layout(
+            xaxis=dict(title="Mean predicted confidence (%)", range=[0, 100],
+                       gridcolor="rgba(255,255,255,0.06)", zeroline=False),
+            yaxis=dict(title="Actual accuracy (%)", range=[0, 100],
+                       gridcolor="rgba(255,255,255,0.06)", zeroline=False),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#e2e8f0"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=10, r=10, t=10, b=10),
+            height=380,
+        )
+        st.plotly_chart(fig_rel, use_container_width=True)
+
+        # ── Individual answers scatter ─────────────────────────────────────
+        st.markdown(eyebrow("Individual Answers"), unsafe_allow_html=True)
+        st.markdown("""
+        <p style="color:#8892a4;font-size:0.85rem;margin:0 0 1rem;">
+          Every one of the 90 labeled answers, plotted by its confidence score. Green is
+          human-marked correct, red is incorrect.
+        </p>
+        """, unsafe_allow_html=True)
+
+        rng = np.random.default_rng(42)
+        y_base = cal_df["system"].map({"baseline": 0, "finetuned": 1}).astype(float)
+        jitter = rng.uniform(-0.15, 0.15, size=len(cal_df))
+        y_pos  = y_base + jitter
+
+        fig_scatter = go.Figure()
+        for correct_val, label, color in [(1, "Correct", "#4ade80"), (0, "Incorrect", "#f87171")]:
+            mask = cal_df["correct"] == correct_val
+            fig_scatter.add_trace(go.Scatter(
+                x=cal_df.loc[mask, "confidence_score"], y=y_pos[mask], mode="markers",
+                marker=dict(size=9, color=color, opacity=0.85,
+                            line=dict(width=1, color="rgba(0,0,0,0.3)")),
+                name=label,
+                hovertemplate=f"{label}<br>Confidence: %{{x:.0f}}%<extra></extra>",
+            ))
+        fig_scatter.update_layout(
+            xaxis=dict(title="Confidence score (%)", range=[0, 100],
+                       gridcolor="rgba(255,255,255,0.06)", zeroline=False),
+            yaxis=dict(tickvals=[0, 1], ticktext=["Baseline", "Fine-tuned"],
+                       range=[-0.5, 1.5], gridcolor="rgba(255,255,255,0.06)", zeroline=False),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#e2e8f0"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=10, r=10, t=10, b=10),
+            height=320,
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
