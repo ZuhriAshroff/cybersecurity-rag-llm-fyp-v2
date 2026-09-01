@@ -1,5 +1,6 @@
 import sys
 import os
+import html
 sys.path.insert(0, os.path.dirname(__file__))
 
 import streamlit as st
@@ -263,6 +264,13 @@ def confidence_bar_html(pct: float, dim: bool = False) -> str:
 
 
 def sentence_row_html(sentence: str, sim: float, supported: bool) -> str:
+    # The naive sentence-splitter in score_hallucination() can grab a fragment
+    # that spans a markdown table (it only splits on .!? — table syntax has
+    # no sentence-ending punctuation at row boundaries). Collapsing embedded
+    # whitespace/newlines to single spaces removes the line structure a table
+    # needs to be recognized at all — html.escape() alone doesn't do this, it
+    # only escapes HTML entities, not markdown syntax characters.
+    sentence = " ".join(sentence.split())
     if supported:
         icon, color, bg = "✓", "#4ade80", "rgba(74,222,128,0.06)"
     else:
@@ -274,7 +282,7 @@ def sentence_row_html(sentence: str, sim: float, supported: bool) -> str:
         f'  <span style="color:{color};font-weight:700;font-size:0.95rem;'
         f'flex-shrink:0;margin-top:2px;">{icon}</span>'
         f'  <div style="flex:1;">'
-        f'    <p style="margin:0 0 3px;color:#e2e8f0;font-size:0.9rem;line-height:1.55;">{sentence}</p>'
+        f'    <p style="margin:0 0 3px;color:#e2e8f0;font-size:0.9rem;line-height:1.55;">{html.escape(sentence)}</p>'
         f'    <span style="font-size:0.73rem;color:#8892a4;">similarity · {sim:.2f}</span>'
         f'  </div>'
         f'</div>'
