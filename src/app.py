@@ -65,6 +65,13 @@ section[data-testid="stMain"] > div {
 [data-testid="stHorizontalBlock"],
 .block-container { background: transparent !important; }
 .block-container { max-width: 1100px !important; padding-top: 1rem !important; }
+
+/* Sidebar collapsed → let content use the full width instead of staying
+   capped at the centered default. Scoped to aria-expanded="false" only,
+   so it has no effect while the sidebar is open. */
+[data-testid="stSidebar"][aria-expanded="false"] ~ div .block-container {
+  max-width: 100% !important;
+}
 *:not([data-testid="stIconMaterial"]),
 *::before, *::after { font-family: 'Space Grotesk', sans-serif !important; }
 
@@ -159,10 +166,17 @@ section[data-testid="stMain"] > div {
   padding: 0.1rem 0.35rem;
   font-size: 0.85em;
 }
+.answer-content .table-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+  max-height: 420px;
+}
 .answer-content table {
-  display: block;
+  table-layout: auto;
   overflow-x: auto;
   width: 100%;
+  min-width: 500px;
   border-collapse: collapse;
   margin: 0.75rem 0;
   font-size: 0.85rem;
@@ -350,8 +364,10 @@ def render_answer_html(answer: str) -> str:
     """Convert the model's raw markdown answer (bold, lists, tables, ...) into
     real HTML, instead of dumping it into a single <p> — a <p> can't legally
     contain block-level content like a table, so browsers silently mangle the
-    layout when it tries to."""
-    return md_lib.markdown(answer, extensions=["tables", "fenced_code", "nl2br"])
+    layout when it tries to. Wrapped in .table-scroll so any table inside can
+    scroll independently of the surrounding card."""
+    html = md_lib.markdown(answer, extensions=["tables", "fenced_code", "nl2br"])
+    return f'<div class="table-scroll">{html}</div>'
 
 
 def render_pipeline_result(result: dict) -> None:
